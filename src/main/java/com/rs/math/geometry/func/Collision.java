@@ -10,6 +10,8 @@ import com.rs.math.geometry.value.Vector;
 
 import java.util.List;
 
+import static com.rs.math.geometry.func.Collision.ResultType.IN;
+import static com.rs.math.geometry.func.Collision.ResultType.ON;
 import static com.rs.math.geometry.func.Collision.ResultType.OUT;
 
 public class Collision {
@@ -45,6 +47,23 @@ public class Collision {
         return d < c.radius;
     }
 
+    public static boolean testPossible(Segment a, Segment b) {
+        Point a1 = a.a;
+        Point a2 = a.b;
+        Point b1 = b.a;
+        Point b2 = b.b;
+        Vector va = new Vector(a1, a2);
+        Vector vb = new Vector(b1, b2);
+        boolean ta = Vector.cross(va, new Vector(a1, b1)) * Vector.cross(va, new Vector(a1, b2)) < Constants.EPSILON;
+        boolean tb = Vector.cross(vb, new Vector(b1, a1)) * Vector.cross(vb, new Vector(b1, a2)) < Constants.EPSILON;
+        return ta && tb;
+    }
+
+    public static boolean test(Segment a, Segment b) {
+        Result r = intersect(a, b);
+        return r.resultType == IN || r.resultType == ON;
+    }
+
     // in
 
     public static boolean in(Point p, Polygon polygon) {
@@ -59,6 +78,24 @@ public class Collision {
                 c = !c;
         }
         return c;
+    }
+
+    public static boolean in(Segment segment, Polygon polygon) {
+        Point a = segment.a;
+        Point b = segment.b;
+        if (!in(a, polygon) || !in(b, polygon)) {
+            return false;
+        }
+        List<Point> points = polygon.points;
+        int size = points.size();
+        for (int i = 0, j = size - 1; i < size; j = i, i++) {
+            Point pi = points.get(i);
+            Point pj = points.get(j);
+            if (testPossible(new Segment(pi, pj), segment)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     // on
@@ -98,7 +135,6 @@ public class Collision {
     }
 
     public static Result intersect(Segment a, Line b) {
-        //LATER implement cross product shortcut
         Line line = a.getLine();
         Result r = intersect(line, b);
         switch (r.resultType) {
@@ -113,7 +149,10 @@ public class Collision {
     }
 
     public static Result intersect(Segment a, Segment b) {
-        //LATER implement cross product shortcut
+        if (!testPossible(a, b)) {
+            return new Result(OUT, null);
+        }
+
         Line la = a.getLine();
         Line lb = b.getLine();
         Result r = intersect(la, lb);
