@@ -14,6 +14,10 @@ public class Vector {
         this.y = to.y - from.y;
     }
 
+    public float length() {
+        return (float) Math.hypot(x, y);
+    }
+
     public static float cross(Vector a, Vector b) {
         return a.x * b.y - a.y * b.x;
     }
