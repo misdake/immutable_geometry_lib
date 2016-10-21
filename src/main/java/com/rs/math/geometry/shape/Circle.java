@@ -1,4 +1,4 @@
-package geometry.shape;
+package com.rs.math.geometry.shape;
 
 public class Circle {
     public final Point center;

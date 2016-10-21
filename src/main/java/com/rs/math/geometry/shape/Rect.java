@@ -1,6 +1,6 @@
-package geometry.shape;
+package com.rs.math.geometry.shape;
 
-import geometry.value.Vector;
+import com.rs.math.geometry.value.Vector;
 
 public class Rect {
     public final Point  center;

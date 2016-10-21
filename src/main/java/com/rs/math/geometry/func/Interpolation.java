@@ -1,7 +1,7 @@
-package geometry.func;
+package com.rs.math.geometry.func;
 
-import geometry.shape.Point;
-import geometry.shape.Segment;
+import com.rs.math.geometry.shape.Point;
+import com.rs.math.geometry.shape.Segment;
 
 public class Interpolation {
     public static Point lerp(Point a, Point b, float v) {

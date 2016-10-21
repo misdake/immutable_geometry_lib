@@ -1,6 +1,6 @@
-package geometry.value;
+package com.rs.math.geometry.value;
 
-import geometry.shape.Point;
+import com.rs.math.geometry.shape.Point;
 
 public class Vector {
     public final float x;

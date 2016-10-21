@@ -1,8 +1,8 @@
-package geometry.func;
+package com.rs.math.geometry.func;
 
-import geometry.shape.Circle;
-import geometry.shape.Line;
-import geometry.shape.Point;
+import com.rs.math.geometry.shape.Line;
+import com.rs.math.geometry.shape.Point;
+import com.rs.math.geometry.shape.Circle;
 
 public class Collision {
 

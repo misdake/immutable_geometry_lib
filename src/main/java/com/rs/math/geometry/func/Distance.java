@@ -1,8 +1,8 @@
-package geometry.func;
+package com.rs.math.geometry.func;
 
-import geometry.shape.Line;
-import geometry.shape.Point;
-import geometry.value.Vector;
+import com.rs.math.geometry.shape.Line;
+import com.rs.math.geometry.shape.Point;
+import com.rs.math.geometry.value.Vector;
 
 public class Distance {
     public static float get(Point a, Point b) {

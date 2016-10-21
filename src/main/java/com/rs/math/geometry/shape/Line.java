@@ -1,6 +1,6 @@
-package geometry.shape;
+package com.rs.math.geometry.shape;
 
-import geometry.value.Normal;
+import com.rs.math.geometry.value.Normal;
 
 public class Line {
     public final Point  point;
