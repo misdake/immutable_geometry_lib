@@ -5,17 +5,17 @@ import com.rs.math.geometry.shape.Point;
 import com.rs.math.geometry.shape.Polygon;
 import com.rs.math.geometry.shape.Rect;
 import com.rs.math.geometry.shape.Segment;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import static com.rs.math.geometry.func.Collision.ResultType.IN;
 import static com.rs.math.geometry.func.Collision.ResultType.ON;
 import static com.rs.math.geometry.func.Collision.ResultType.OUT;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.*;
 
-class CollisionTest {
+public class CollisionTest {
 
     @Test
-    void lineIntersectLine() {
+    public void lineIntersectLine() {
         {
             Line l1 = new Line(new Point(0, 0), new Point(0.2f, 0.2f));
             Line l2 = new Line(new Point(1, 0), new Point(0, 1));
@@ -40,7 +40,7 @@ class CollisionTest {
     }
 
     @Test
-    void segmentIntersectLine() {
+    public void segmentIntersectLine() {
         {
             Segment l1 = new Segment(new Point(0, 0), new Point(0.2f, 0.2f));
             Line l2 = new Line(new Point(1, 0), new Point(0, 1));
@@ -72,7 +72,7 @@ class CollisionTest {
     }
 
     @Test
-    void segmentIntersectSegment() {
+    public void segmentIntersectSegment() {
         {
             Segment l1 = new Segment(new Point(0, 0), new Point(0.2f, 0.2f));
             Segment l2 = new Segment(new Point(1, 0), new Point(0, 1));
@@ -114,7 +114,7 @@ class CollisionTest {
     }
 
     @Test
-    void pointInsidePolygon() {
+    public void pointInsidePolygon() {
         {
             Polygon g = new Rect(new Point(0, 0), 2, 2, 0);
             Point p1 = new Point(0.9f, 0);
