@@ -1,5 +1,6 @@
 package com.rs.math.geometry.shape;
 
+import com.rs.math.geometry.func.Distance;
 import com.rs.math.geometry.value.Normal;
 
 public class Segment {
@@ -9,7 +10,12 @@ public class Segment {
         this.a = a;
         this.b = b;
     }
+
     public Line getLine() {
         return new Line(a, new Normal(a, b));
+    }
+
+    public float length() {
+        return Distance.distance(a, b);
     }
 }
