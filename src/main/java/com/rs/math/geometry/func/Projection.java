@@ -5,7 +5,7 @@ import com.rs.math.geometry.shape.Point;
 import com.rs.math.geometry.value.Vector;
 
 public class Projection {
-    public static Point doit(Point from, Line to) {
+    public static Point project(Point from, Line to) {
         Vector v = new Vector(from, to.point);
         float d = Vector.dot(v, to.direction);
         float dx = d * to.direction.x;
