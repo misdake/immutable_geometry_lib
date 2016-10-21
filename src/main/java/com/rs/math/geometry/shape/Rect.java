@@ -2,10 +2,11 @@ package com.rs.math.geometry.shape;
 
 import com.rs.math.geometry.func.Distance;
 import com.rs.math.geometry.func.Interpolation;
-import com.rs.math.geometry.func.Rotation;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.rs.math.geometry.func.Rotation.rotate;
 
 public class Rect extends Polygon {
     public final Point  center;
@@ -31,10 +32,10 @@ public class Rect extends Polygon {
         List<Point> points = new ArrayList<Point>();
         float x = width / 2;
         float y = height / 2;
-        points.add(Rotation.rotate(-x, -y, center, rotation));
-        points.add(Rotation.rotate(x, -y, center, rotation));
-        points.add(Rotation.rotate(x, y, center, rotation));
-        points.add(Rotation.rotate(-x, y, center, rotation));
+        points.add(rotate(-x + center.x, -y + center.y, center, rotation));
+        points.add(rotate(+x + center.x, -y + center.y, center, rotation));
+        points.add(rotate(+x + center.x, +y + center.y, center, rotation));
+        points.add(rotate(-x + center.x, +y + center.y, center, rotation));
         return points;
     }
 }
