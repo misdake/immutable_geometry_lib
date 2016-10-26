@@ -95,7 +95,12 @@ public class Collision {
     public static boolean in(Segment segment, Polygon polygon) {
         Point a = segment.a;
         Point b = segment.b;
-        if (!in(a, polygon) || !in(b, polygon)) {
+
+        boolean inA = in(a, polygon);
+        boolean inB = in(b, polygon);
+        boolean onA = on(a, polygon);
+        boolean onB = on(b, polygon);
+        if ((!inA && !onA) || (!inB && !onB)) {
             return false;
         }
         List<Point> points = polygon.points;
@@ -103,7 +108,7 @@ public class Collision {
         for (int i = 0, j = size - 1; i < size; j = i, i++) {
             Point pi = points.get(i);
             Point pj = points.get(j);
-            if (test(new Segment(pi, pj), segment)) {
+            if (intersect(new Segment(pi, pj), segment).resultType == INTERSECTED) {
                 return false;
             }
         }
@@ -129,6 +134,13 @@ public class Collision {
         float dot = Vector.dot(v, line.direction);
         boolean inSegment = dot <= maxLength + Constants.EPSILON && dot >= -Constants.EPSILON;
         return inSegment;
+    }
+
+    public static boolean on(Point p, Polygon polygon) {
+        for (Segment segment : polygon.segments) {
+            if (on(p, segment)) return true;
+        }
+        return false;
     }
 
     // intersect

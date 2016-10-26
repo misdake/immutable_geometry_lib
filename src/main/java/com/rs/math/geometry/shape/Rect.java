@@ -29,7 +29,7 @@ public class Rect extends Polygon {
     }
 
     private static List<Point> generatePoints(Point center, float width, float height, float rotation) {
-        List<Point> points = new ArrayList<Point>();
+        List<Point> points = new ArrayList<>();
         float x = width / 2;
         float y = height / 2;
         points.add(rotate(-x + center.x, -y + center.y, center, rotation));
