@@ -16,51 +16,59 @@ import static org.junit.Assert.*;
 public class UnionTest {
 
     /*
-     * table char
-     *  ─│
-     * ┌┬┐
-     * ├┼┤
-     * └┴┘
+     * ┌───┬───┐
+     * │   │   │
+     * ├───┼───┤
+     * │   │   │
+     * └───┴───┘
+     *  (╯°Д°)╯︵ ┻━┻
      */
 
     /*
-     *   ┌─┐
-     * ┌┼┐│ p2
-     * │└┼┘
-     * └─┘
-     *   p1
+     *   ┌───┐
+     * ┌─┼─┐ │ p2
+     * │ └─┼─┘
+     * └───┘
+     *  p1
      */
     private static Polygon p1 = new Polygon(new float[]{0, 0, 2, 0, 2, 2, 0, 2});
     private static Polygon p2 = new Polygon(new float[]{1, 1, 3, 1, 3, 3, 1, 3});
 
     /*
-     * ┌─┐
-     * │┌┼┐ p4
-     * │└┼┘
-     * └─┘
-     *   p3
+     * ┌──┐
+     * │ ┌┼┐ p4
+     * │ └┼┘
+     * └──┘
+     * p3
      */
     private static Polygon p3 = new Polygon(new float[]{0, 0, 2, 0, 2, 3, 0, 3});
     private static Polygon p4 = new Polygon(new float[]{1, 1, 3, 1, 3, 2, 1, 2});
 
     /*
-     *   ┌┐
-     * ┌┼┼┐ p6
-     * └┼┼┘
-     *   └┘
-     *    p5
+     *   ┌─┐
+     * ┌─┼─┼─┐ p6
+     * └─┼─┼─┘
+     *   └─┘
+     *   p5
      */
     private static Polygon p5 = new Polygon(new float[]{1, 0, 2, 0, 2, 3, 1, 3});
     private static Polygon p6 = new Polygon(new float[]{0, 1, 3, 1, 3, 2, 0, 2});
 
     /*
-     * ┌─┬─┐
-     * │  │  │
-     * └─┴─┘
-     *   p7  p8
+     * ┌───┬───┐
+     * │   │   │
+     * └───┴───┘
+     *   p1  p8
      */
-    private static Polygon p7 = new Polygon(new float[]{0, 0, 2, 0, 2, 2, 0, 2});
-    private static Polygon p8 = new Polygon(new float[]{2, 0, 4, 0, 4, 2, 2, 2});
+    private static Polygon p7 = new Polygon(new float[]{2, 0, 4, 0, 4, 2, 2, 2});
+
+    /*
+     * ┌─┬─┬─┐
+     * │ │ │ │
+     * └─┴─┴─┘
+     *  p1  p8
+     */
+    private static Polygon p8 = new Polygon(new float[]{0, 0, 2, 0, 2, 2, 0, 2});
 
     @Test
     public void simplePolygonUnionMultiPolygon() {
@@ -72,8 +80,12 @@ public class UnionTest {
     @Test
     @Ignore
     public void complexPolygonUnionMultiPolygon() {
-        polygonUnionMultiPolygon(p7, p8, new float[]{0, 0, 4, 0, 4, 2, 0, 2});
-        polygonUnionMultiPolygon(p7, p7, new float[]{0, 0, 2, 0, 2, 2, 0, 2});
+        polygonUnionMultiPolygon(p1, p1, new float[]{0, 0, 2, 0, 2, 2, 0, 2});
+        polygonUnionMultiPolygon(p1, p7, new float[]{0, 0, 4, 0, 4, 2, 0, 2});
+        polygonUnionMultiPolygon(p1, p7, new float[]{0, 0, 4, 0, 4, 2, 0, 2});
+        polygonUnionMultiPolygon(p1, p8, new float[]{0, 0, 3, 0, 3, 2, 0, 2});
+        polygonUnionMultiPolygon(p4, p6, new float[]{0, 1, 3, 1, 3, 2, 0, 2});
+        polygonUnionMultiPolygon(p1, p5, new float[]{0, 0, 2, 0, 2, 3, 1, 3, 1, 2, 0, 2});
     }
 
     private static void polygonUnionMultiPolygon(Polygon a, Polygon b, float[] reference) {
