@@ -10,24 +10,30 @@ import com.rs.math.geometry.value.Vector;
 
 import java.util.List;
 
-import static com.rs.math.geometry.func.Collision.ResultType.IN;
-import static com.rs.math.geometry.func.Collision.ResultType.ON;
-import static com.rs.math.geometry.func.Collision.ResultType.OUT;
+import static com.rs.math.geometry.func.Collision.SegmentResultType.CONNECTED;
+import static com.rs.math.geometry.func.Collision.SegmentResultType.INSIDE;
+import static com.rs.math.geometry.func.Collision.SegmentResultType.INTERSECTED;
+import static com.rs.math.geometry.func.Collision.SegmentResultType.NON;
+import static com.rs.math.geometry.func.Collision.SegmentResultType.SAME;
+import static com.rs.math.geometry.func.Collision.SegmentResultType.SHARED;
 
 public class Collision {
 
-    public enum ResultType {
-        IN,
-        ON,
-        OUT
+    public enum SegmentResultType {
+        SAME,
+        INSIDE,
+        SHARED,
+        CONNECTED,
+        INTERSECTED,
+        NON,
     }
 
-    public static class Result {
-        public final ResultType resultType;
-        public final Point      hitPoint;
-        public Result(ResultType resultType, Point hitPoint) {
+    public static class SegmentResult {
+        public final SegmentResultType resultType;
+        public final Point             point;
+        public SegmentResult(SegmentResultType resultType, Point point) {
             this.resultType = resultType;
-            this.hitPoint = hitPoint;
+            this.point = point;
         }
     }
 
@@ -60,8 +66,14 @@ public class Collision {
     }
 
     public static boolean test(Segment a, Segment b) {
-        Result r = intersect(a, b);
-        return r.resultType == IN || r.resultType == ON;
+        SegmentResult r = intersect(a, b);
+        return r.resultType != NON;
+    }
+
+    // is
+
+    public static boolean is(Point p1, Point p2) {
+        return Distance.distance(p1, p2) < Constants.EPSILON;
     }
 
     // in
@@ -91,7 +103,7 @@ public class Collision {
         for (int i = 0, j = size - 1; i < size; j = i, i++) {
             Point pi = points.get(i);
             Point pj = points.get(j);
-            if (testPossible(new Segment(pi, pj), segment)) {
+            if (test(new Segment(pi, pj), segment)) {
                 return false;
             }
         }
@@ -106,66 +118,107 @@ public class Collision {
         Line line = s.getLine();
         float distance = Distance.distance(p, line);
         if (distance > Constants.EPSILON) return false;
-        boolean inSegment = Vector.dot(v, line.direction) <= maxLength;
+        float dot = Vector.dot(v, line.direction);
+        boolean inSegment = dot <= maxLength + Constants.EPSILON && dot >= -Constants.EPSILON;
+        return inSegment;
+    }
+    private static boolean on_trusted(Point p, Segment s) {
+        float maxLength = s.length();
+        Vector v = new Vector(s.a, p);
+        Line line = s.getLine();
+        float dot = Vector.dot(v, line.direction);
+        boolean inSegment = dot <= maxLength + Constants.EPSILON && dot >= -Constants.EPSILON;
         return inSegment;
     }
 
     // intersect
 
-    public static Result intersect(Line a, Line b) {
+    public static SegmentResult intersect(Line a, Line b) { // SAME || INTERSECTED || NON
         Point aProj = Projection.project(a.point, b);
         Vector v = new Vector(a.point, aProj);
 
         float length = v.length();
         if (length < Constants.EPSILON) {
-            // point a is on line b => ON
-            return new Result(ResultType.ON, null);
+            // point a is on line b => SAME
+            return new SegmentResult(SAME, null);
         }
 
         float direction = Vector.dot(v, a.direction);
         if (Math.abs(direction) < Constants.EPSILON) {
-            // projection (point a -> line b) direction is perpendicular to line a => parallel => OUT
-            return new Result(OUT, null);
+            // projection (point a -> line b) direction is perpendicular to line a => parallel => NON
+            return new SegmentResult(NON, null);
         }
 
         float t = length * length / direction;
         float x = a.point.x + a.direction.x * t;
         float y = a.point.y + a.direction.y * t;
-        return new Result(ResultType.IN, new Point(x, y));
+        return new SegmentResult(INTERSECTED, new Point(x, y));
     }
 
-    public static Result intersect(Segment a, Line b) {
+    public static SegmentResult intersect(Segment a, Line b) { // INSIDE || INTERSECTED || NON
         Line line = a.getLine();
-        Result r = intersect(line, b);
-        switch (r.resultType) {
-            case IN: // test
-                boolean in = on(r.hitPoint, a);
-                return in ? r : new Result(OUT, null);
-            case ON:
-            case OUT:
+        SegmentResult r = intersect(line, b);
+        switch (r.resultType) { // SAME || INTERSECTED || NON
+            case INTERSECTED: // test
+                boolean intersected = on_trusted(r.point, a);
+                return intersected ? r : new SegmentResult(NON, null);
+            case SAME:
+                return new SegmentResult(INSIDE, null);
+            case NON:
                 return r;
         }
         throw new RuntimeException("unexpected resultType");
     }
 
-    public static Result intersect(Segment a, Segment b) {
+    public static SegmentResult intersect(Segment a, Segment b) {
         if (!testPossible(a, b)) {
-            return new Result(OUT, null);
+            return new SegmentResult(NON, null);
         }
 
         Line la = a.getLine();
         Line lb = b.getLine();
-        Result r = intersect(la, lb);
+        SegmentResult r = intersect(la, lb);
         switch (r.resultType) {
-            case IN: // test
-                boolean inA = on(r.hitPoint, a);
-                boolean inB = on(r.hitPoint, b);
-                return inA && inB ? r : new Result(OUT, null);
-            case ON:
-                boolean onA = on(b.a, a);
-                boolean onB = on(b.b, a);
-                return onA || onB ? r : new Result(OUT, null);
-            case OUT:
+            case INTERSECTED: {
+                //share one point?
+                boolean is_aa_ba = is(a.a, b.a);
+                boolean is_ab_bb = is(a.b, b.b);
+                boolean is_aa_bb = is(a.a, b.b);
+                boolean is_ab_ba = is(a.b, b.a);
+                if (is_aa_ba || is_ab_bb || is_aa_bb || is_ab_ba) {
+                    return new SegmentResult(CONNECTED, null);
+                }
+
+                //test point
+                boolean inA = on_trusted(r.point, a);
+                boolean inB = on_trusted(r.point, b);
+                return inA && inB ? r : new SegmentResult(INTERSECTED, null);
+            }
+
+            case SAME: {
+                //share two points
+                boolean is_aa_ba = is(a.a, b.a);
+                boolean is_ab_bb = is(a.b, b.b);
+                boolean is_aa_bb = is(a.a, b.b);
+                boolean is_ab_ba = is(a.b, b.a);
+                boolean same = (is_aa_ba && is_ab_bb) || (is_aa_bb && is_ab_ba);
+                if (same) return r;
+
+                //share one point
+                boolean on_ba_a = on_trusted(b.a, a);
+                boolean on_bb_a = on_trusted(b.b, a);
+                boolean on_aa_b = on_trusted(a.a, b);
+                boolean on_ab_b = on_trusted(a.b, b);
+                if (is_aa_ba) return (on_ab_b || on_bb_a) ? new SegmentResult(INSIDE, null) : new SegmentResult(CONNECTED, null);
+                if (is_aa_bb) return (on_ab_b || on_ba_a) ? new SegmentResult(INSIDE, null) : new SegmentResult(CONNECTED, null);
+                if (is_ab_ba) return (on_aa_b || on_bb_a) ? new SegmentResult(INSIDE, null) : new SegmentResult(CONNECTED, null);
+                if (is_ab_bb) return (on_aa_b || on_ba_a) ? new SegmentResult(INSIDE, null) : new SegmentResult(CONNECTED, null);
+
+                //no shared point
+                if ((on_ba_a && on_bb_a) || (on_aa_b && on_ab_b)) return new SegmentResult(INSIDE, null);
+                return !on_ba_a && !on_bb_a && !on_aa_b && !on_ab_b ? new SegmentResult(NON, null) : new SegmentResult(SHARED, null);
+            }
+            case NON:
                 return r;
         }
         throw new RuntimeException("unexpected resultType");
