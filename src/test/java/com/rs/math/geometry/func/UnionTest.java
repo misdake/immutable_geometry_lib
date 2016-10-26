@@ -73,6 +73,7 @@ public class UnionTest {
     @Ignore
     public void complexPolygonUnionMultiPolygon() {
         polygonUnionMultiPolygon(p7, p8, new float[]{0, 0, 4, 0, 4, 2, 0, 2});
+        polygonUnionMultiPolygon(p7, p7, new float[]{0, 0, 2, 0, 2, 2, 0, 2});
     }
 
     private static void polygonUnionMultiPolygon(Polygon a, Polygon b, float[] reference) {

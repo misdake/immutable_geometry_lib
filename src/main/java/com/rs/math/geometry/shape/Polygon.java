@@ -12,14 +12,13 @@ public class Polygon {
         this(points, false);
     }
     public Polygon(float[] xy) {
-        this(xyToPoints(xy), false);
+        this(xyToPoints(xy), true);
     }
-    Polygon(List<Point> points, boolean unmodifiable) {
-        if (unmodifiable) {
-            this.points = points;
-        } else {
-            this.points = Collections.unmodifiableList(new ArrayList<>(points));
+    Polygon(List<Point> points, boolean owning) {
+        if (!owning) {
+            points = new ArrayList<>(points);
         }
+        this.points = Collections.unmodifiableList(new ArrayList<>(points));
         this.segments = Collections.unmodifiableList(createSegments(points));
     }
 
