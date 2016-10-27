@@ -1,14 +1,11 @@
 package com.rs.math.geometry.func;
 
-import com.rs.math.geometry.Constants;
 import com.rs.math.geometry.shape.MultiPolygon;
 import com.rs.math.geometry.shape.Point;
 import com.rs.math.geometry.shape.Polygon;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -98,25 +95,7 @@ public class UnionTest {
         Polygon referenceResult = new Polygon(reference);
         assertEquals(referenceResult.points.size(), points.size());
 
-        List<Point> t = new ArrayList<>(points);
-        for (Point point : referenceResult.points) {
-            Point x = nearestPoint(point, t);
-            assertNotNull(x);
-            t.remove(x);
-            assertTrue(Distance.distance(point, x) < Constants.EPSILON);
-        }
+        TestUtil.polygonEqual(points, referenceResult.points);
     }
 
-    private static Point nearestPoint(Point p, Collection<Point> points) {
-        Point min = null;
-        float minD = Float.MAX_VALUE;
-        for (Point point : points) {
-            float d = Distance.distance(p, point);
-            if (d < minD) {
-                minD = d;
-                min = point;
-            }
-        }
-        return min;
-    }
 }

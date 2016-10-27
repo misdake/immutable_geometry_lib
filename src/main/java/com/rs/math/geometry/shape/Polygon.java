@@ -2,6 +2,7 @@ package com.rs.math.geometry.shape;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -10,6 +11,9 @@ public class Polygon {
     public final List<Segment> segments;
     public Polygon(List<Point> points) {
         this(points, false);
+    }
+    public Polygon(Point... points) {
+        this(Arrays.asList(points), true);
     }
     public Polygon(float[] xy) {
         this(xyToPoints(xy), true);
