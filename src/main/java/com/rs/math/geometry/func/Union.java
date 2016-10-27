@@ -13,36 +13,6 @@ import java.util.Map;
 
 public class Union {
     public static MultiPolygon unionWithoutHoles(Polygon polygon, MultiPolygon group) {
-//        Polygon minPolygon = null;
-//        float minX = Float.MAX_VALUE;
-//        float minY = Float.MAX_VALUE;
-//        int minIndex = -1;
-//        {
-//            List<Point> p1Points = p.points;
-//            for (int i = 0; i < p1Points.size(); i++) {
-//                Point point = p1Points.get(i);
-//                if (point.x < minX || (point.x == minX && point.y < minY)) {
-//                    minIndex = i;
-//                    minX = point.x;
-//                    minY = point.y;
-//                    minPolygon = p;
-//                }
-//            }
-//            for (Polygon polygon : group.polygons) {
-//                List<Point> p2Points = polygon.points;
-//                for (int i = 0; i < p2Points.size(); i++) {
-//                    Point point = p2Points.get(i);
-//                    if (point.x < minX || (point.x == minX && point.y < minY)) {
-//                        minIndex = i;
-//                        minX = point.x;
-//                        minY = point.y;
-//                        minPolygon = polygon;
-//                    }
-//                }
-//            }
-//            if (minPolygon == null) return null;
-//        }
-
         //prepare segments
         List<Segment> s1l = new ArrayList<>(polygon.segments);
         List<List<Segment>> s2ll = new ArrayList<>();
@@ -89,6 +59,7 @@ public class Union {
         }
 
         //clear polygon segments in group
+        //using saved polygons "p2l"
         for (Iterator<Segment> iterator = s1l.iterator(); iterator.hasNext(); ) {
             Segment s1 = iterator.next();
 
@@ -104,7 +75,7 @@ public class Union {
             }
         }
 
-        //应该只剩下外圈了，遍历
+        //add to graph
         Map<Point, List<Point>> graph = new HashMap<>();
         for (Segment s1 : s1l) {
             addMultiMap(graph, s1.a, s1.b);
@@ -117,12 +88,14 @@ public class Union {
             }
         }
 
+        //basic checking
         for (Map.Entry<Point, List<Point>> e : graph.entrySet()) {
             if (e.getValue().size() != 2) {
                 System.out.println("fail");
             }
         }
 
+        //grab rings one by one
         List<Polygon> result = new ArrayList<>();
         while (!graph.isEmpty()) {
             List<Point> list = grabFromGraph(graph);
