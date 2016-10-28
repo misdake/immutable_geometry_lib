@@ -14,6 +14,7 @@ import static com.rs.math.geometry.func.Collision.SegmentResultType.CONNECTED;
 import static com.rs.math.geometry.func.Collision.SegmentResultType.INSIDE;
 import static com.rs.math.geometry.func.Collision.SegmentResultType.INTERSECTED;
 import static com.rs.math.geometry.func.Collision.SegmentResultType.NON;
+import static com.rs.math.geometry.func.Collision.SegmentResultType.OUTSIDE;
 import static com.rs.math.geometry.func.Collision.SegmentResultType.SAME;
 import static com.rs.math.geometry.func.Collision.SegmentResultType.SHARED;
 
@@ -22,6 +23,7 @@ public class Collision {
     public enum SegmentResultType {
         SAME,
         INSIDE,
+        OUTSIDE,
         SHARED,
         CONNECTED,
         INTERSECTED,
@@ -182,7 +184,7 @@ public class Collision {
         throw new RuntimeException("unexpected resultType");
     }
 
-    public static SegmentResult intersect(Segment a, Segment b) {
+    public static SegmentResult intersect(Segment a, Segment b) { // SAME || INSIDE || OUTSIDE || SHARED || CONNECTED || INTERSECTED || NON
         if (!testPossible(a, b)) {
             return new SegmentResult(NON, null);
         }
@@ -221,13 +223,14 @@ public class Collision {
                 boolean on_bb_a = on_trusted(b.b, a);
                 boolean on_aa_b = on_trusted(a.a, b);
                 boolean on_ab_b = on_trusted(a.b, b);
-                if (is_aa_ba) return (on_ab_b || on_bb_a) ? new SegmentResult(INSIDE, null) : new SegmentResult(CONNECTED, null);
-                if (is_aa_bb) return (on_ab_b || on_ba_a) ? new SegmentResult(INSIDE, null) : new SegmentResult(CONNECTED, null);
-                if (is_ab_ba) return (on_aa_b || on_bb_a) ? new SegmentResult(INSIDE, null) : new SegmentResult(CONNECTED, null);
-                if (is_ab_bb) return (on_aa_b || on_ba_a) ? new SegmentResult(INSIDE, null) : new SegmentResult(CONNECTED, null);
+                if (is_aa_ba) return (on_ab_b || on_bb_a) ? new SegmentResult(on_ab_b ? INSIDE : OUTSIDE, null) : new SegmentResult(CONNECTED, null);
+                if (is_aa_bb) return (on_ab_b || on_ba_a) ? new SegmentResult(on_ab_b ? INSIDE : OUTSIDE, null) : new SegmentResult(CONNECTED, null);
+                if (is_ab_ba) return (on_aa_b || on_bb_a) ? new SegmentResult(on_aa_b ? INSIDE : OUTSIDE, null) : new SegmentResult(CONNECTED, null);
+                if (is_ab_bb) return (on_aa_b || on_ba_a) ? new SegmentResult(on_aa_b ? INSIDE : OUTSIDE, null) : new SegmentResult(CONNECTED, null);
 
                 //no shared point
-                if ((on_ba_a && on_bb_a) || (on_aa_b && on_ab_b)) return new SegmentResult(INSIDE, null);
+                if (on_aa_b && on_ab_b) return new SegmentResult(INSIDE, null);
+                if (on_ba_a && on_bb_a) return new SegmentResult(OUTSIDE, null);
                 return !on_ba_a && !on_bb_a && !on_aa_b && !on_ab_b ? new SegmentResult(NON, null) : new SegmentResult(SHARED, null);
             }
             case NON:

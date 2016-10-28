@@ -26,8 +26,8 @@ public class ConvexHull {
             int next = start;
             for (int i = 0; i < array.length; i++) {
                 Point point = array[i];
-                float c = cross(r.get(m - 1), point, array[next]);
-                if (c > 0 || c == 0 && far(r.get(m - 1), point, array[next])) { //TODO compare with epsilon
+                float c = crossDirection(r.get(m - 1), point, array[next]);
+                if (c > Constants.EPSILON || Math.abs(c) < Constants.EPSILON && far(r.get(m - 1), point, array[next])) {
                     next = i;
                 }
             }
@@ -40,6 +40,12 @@ public class ConvexHull {
 
     private static float cross(Point o, Point a, Point b) {
         return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+    }
+    private static float crossDirection(Point o, Point a, Point b) {
+        float r = cross(o, a, b);
+        float sqrt = (float) Math.sqrt(length2(o, a) * length2(o, b));
+        if (sqrt < Constants.EPSILON) return 0;
+        return r / sqrt;
     }
     private static float length2(Point a, Point b) {
         return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y);

@@ -7,7 +7,13 @@ import com.rs.math.geometry.shape.Rect;
 import com.rs.math.geometry.shape.Segment;
 import org.junit.Test;
 
-import static com.rs.math.geometry.func.Collision.SegmentResultType.*;
+import static com.rs.math.geometry.func.Collision.SegmentResultType.CONNECTED;
+import static com.rs.math.geometry.func.Collision.SegmentResultType.INSIDE;
+import static com.rs.math.geometry.func.Collision.SegmentResultType.INTERSECTED;
+import static com.rs.math.geometry.func.Collision.SegmentResultType.NON;
+import static com.rs.math.geometry.func.Collision.SegmentResultType.OUTSIDE;
+import static com.rs.math.geometry.func.Collision.SegmentResultType.SAME;
+import static com.rs.math.geometry.func.Collision.SegmentResultType.SHARED;
 import static org.junit.Assert.*;
 
 public class CollisionTest {
@@ -140,6 +146,13 @@ public class CollisionTest {
     @Test
     public void segmentIntersectSegment() {
         {
+            Segment l1 = new Segment(new Point(0, 0), new Point(1, 1));
+            Segment l2 = new Segment(new Point(1, 1), new Point(0, 0));
+            Collision.SegmentResult r = Collision.intersect(l1, l2);
+            assertEquals(SAME, r.resultType);
+            assertEquals(null, r.point);
+        }
+        {
             Segment l1 = new Segment(new Point(0, 0), new Point(0.2f, 0.2f));
             Segment l2 = new Segment(new Point(1, 0), new Point(0, 1));
             Collision.SegmentResult r = Collision.intersect(l1, l2);
@@ -173,6 +186,19 @@ public class CollisionTest {
             Collision.SegmentResult r = Collision.intersect(l1, l2);
             assertEquals(NON, r.resultType);
             assertEquals(null, r.point);
+        }
+
+        {
+            Segment l1 = new Segment(new Point(0, 0), new Point(2, 0));
+            Segment l2 = new Segment(new Point(1, 0), new Point(2, 0));
+            assertEquals(OUTSIDE, Collision.intersect(l1, l2).resultType);
+            assertEquals(INSIDE, Collision.intersect(l2, l1).resultType);
+        }
+        {
+            Segment l1 = new Segment(new Point(0, 0), new Point(3, 0));
+            Segment l2 = new Segment(new Point(1, 0), new Point(2, 0));
+            assertEquals(OUTSIDE, Collision.intersect(l1, l2).resultType);
+            assertEquals(INSIDE, Collision.intersect(l2, l1).resultType);
         }
 
         {
