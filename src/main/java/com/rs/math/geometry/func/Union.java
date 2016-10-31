@@ -5,104 +5,245 @@ import com.rs.math.geometry.shape.Point;
 import com.rs.math.geometry.shape.Polygon;
 import com.rs.math.geometry.shape.Segment;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 
 public class Union {
-    public static MultiPolygon unionWithoutHoles(Polygon polygon, MultiPolygon group) {
+    public static MultiPolygon unionWithoutHoles(Collection<Polygon> polygons) {
         //prepare segments
-        List<Segment> s1l = new ArrayList<>(polygon.segments);
-        List<List<Segment>> s2ll = new ArrayList<>();
-        for (Polygon p2 : group.polygons) {
-            s2ll.add(new ArrayList<>(p2.segments));
+        Set<Point> allPoints = new HashSet<>();
+        Map<Point, Point> pointMap = new HashMap<>();
+        //add points to allPoints
+        for (Polygon polygon : polygons) {
+            for (Point a : polygon.points) {
+                Point to = getCachedPoint(allPoints, a);
+                pointMap.put(a, to);
+            }
+        }
+        //add segments to allSegments
+        List<Segment> allSegments = new ArrayList<>();
+        for (Polygon polygon : polygons) {
+            allSegments.addAll(polygon.segments);
         }
 
-        //test segments, insert points
-        for (int i1 = 0; i1 < s1l.size(); i1++) {
+        Set<Segment> segments = unionSegments(allSegments);
 
-            for (List<Segment> s2l : s2ll) {
-                for (int i2 = 0; i2 < s2l.size(); i2++) {
-                    Segment s1 = s1l.get(i1); //necessary reload
-                    Segment s2 = s2l.get(i2);
+        //TODO reconstruct graph
+        //TODO while graph not empty
+        //TODO     gather sub-graph
+        //TODO     remove sub-graph from graph
+        //TODO     generate outline of sub-graph using customized ConvexHull
+        //TODO     add outline to result set
 
-                    Collision.SegmentResult r = Collision.intersect(s1, s2);
-                    if (r.resultType == Collision.SegmentResultType.INTERSECTED) {
-                        Point hitPoint = r.point;
+        return null;
+    }
 
-                        insert(s1l, i1, hitPoint);
-                        insert(s2l, i2, hitPoint);
+    public static Set<Segment> unionSegments(Collection<Segment> allSegments) {
+        //prepare segments
+        Set<Point> allPoints = new HashSet<>();
+        Map<Point, Point> pointMap = new HashMap<>();
+        //add points to allPoints
+        for (Segment segment : allSegments) {
+            Point a = getCachedPoint(allPoints, segment.a);
+            Point b = getCachedPoint(allPoints, segment.b);
+            pointMap.put(segment.a, a);
+            pointMap.put(segment.b, b);
+        }
+        //add segments to allSegments
+        Queue<Segment> segmentsToAdd = new ArrayDeque<>();
+        for (Segment segment : allSegments) {
+            segmentsToAdd.add(new Segment(pointMap.get(segment.a), pointMap.get(segment.b)));
+        }
+
+        LinkedList<Segment> currentSegments = new LinkedList<>();
+        while (!segmentsToAdd.isEmpty()) {
+            List<Segment> newSegments = new ArrayList<>();
+            newSegments.add(segmentsToAdd.poll());
+            for (ListIterator<Segment> testIter = currentSegments.listIterator(); testIter.hasNext(); ) {
+                Segment seg = testIter.next();
+
+                for (int i = 0; i < newSegments.size(); i++) {
+                    Segment newSegment = newSegments.get(i);
+                    Collision.SegmentResult r = Collision.intersect(newSegment, seg);
+                    boolean toBreak = false;
+                    switch (r.resultType) {
+                        case INTERSECTED: {
+                            //cut each in 2
+                            Point point = getCachedPoint(allPoints, r.point);
+                            //replace seg with two segments and skip them.
+                            testIter.previous();
+                            testIter.remove();
+                            toBreak = true;
+                            if (!Collision.is(seg.a, point)) testIter.add(new Segment(seg.a, point));
+                            if (!Collision.is(point, seg.b)) testIter.add(new Segment(point, seg.b));
+                            //replace newSegment with two segments and continue with the first one (then the second one).
+                            if (!Collision.is(newSegment.a, point)) newSegments.set(i, new Segment(newSegment.a, point));
+                            if (!Collision.is(point, newSegment.b)) newSegments.add(i + 1, new Segment(point, newSegment.b));
+                            break;
+                        }
+                        case INTERLEAVED: {
+                            //cut each in 2, replace newSegment with the non-common part.
+                            int aa_index = r.indices[0];
+                            int ab_index = r.indices[1];
+                            int ba_index = r.indices[2];
+                            int bb_index = r.indices[3];
+                            if (aa_index == 1 || aa_index == 2) { //aa is in b
+                                testIter.previous();
+                                testIter.remove();
+                                toBreak = true;
+                                testIter.add(new Segment(seg.a, newSegment.a));
+                                testIter.add(new Segment(newSegment.a, seg.b));
+                                testIter.previous(); //don't skip. more in/out/interleaved may be produced.
+                                testIter.previous();
+                                if (Math.abs(ba_index - ab_index) < Math.abs(bb_index - ab_index)) {
+                                    newSegments.set(i, new Segment(newSegment.b, seg.a)); //newSegment.b is closer to seg.a than seg.b
+                                } else {
+                                    newSegments.set(i, new Segment(newSegment.b, seg.b)); //newSegment.b is closer to seg.a than seg.b
+                                }
+                            } else { //ab is in b
+                                testIter.previous();
+                                testIter.remove();
+                                toBreak = true;
+                                testIter.add(new Segment(seg.a, newSegment.b));
+                                testIter.add(new Segment(newSegment.b, seg.b));
+                                testIter.previous(); //don't skip. more in/out/interleaved may be produced.
+                                testIter.previous();
+                                if (Math.abs(ba_index - aa_index) < Math.abs(bb_index - aa_index)) {
+                                    newSegments.set(i, new Segment(newSegment.a, seg.a)); //newSegment.a is closer to seg.a than seg.b, replace
+                                } else {
+                                    newSegments.set(i, new Segment(newSegment.a, seg.b)); //newSegment.a is closer to seg.a than seg.b, replace
+                                }
+                                i--;
+                            }
+                            break;
+                        }
+                        case IN: {
+                            //cut seg in 3, and remove newSegment
+                            int aa_index = r.indices[0];
+                            int ab_index = r.indices[1];
+                            int ba_index = r.indices[2];
+                            int bb_index = r.indices[3];
+                            Point a1 = (aa_index < ab_index) ? newSegment.a : newSegment.b;
+                            Point a2 = (aa_index < ab_index) ? newSegment.b : newSegment.a;
+                            Point b1 = (ba_index < bb_index) ? seg.a : seg.b;
+                            Point b2 = (ba_index < bb_index) ? seg.b : seg.a;
+                            testIter.previous();
+                            testIter.remove();
+                            toBreak = true;
+                            testIter.add(new Segment(b1, a1));
+                            testIter.add(new Segment(a1, a2));
+                            testIter.add(new Segment(a2, b2));
+                            testIter.previous();
+                            testIter.previous();
+                            testIter.previous();
+                            newSegments.remove(i);
+                            i--;
+                            break;
+                        }
+                        case IN_CONNECTED: {
+                            //cut seg in 2, and remove newSegment
+                            int aa_index = r.indices[0];
+                            int ab_index = r.indices[1];
+                            int ba_index = r.indices[2];
+                            int bb_index = r.indices[3];
+                            Point a1 = (aa_index < ab_index) ? newSegment.a : newSegment.b;
+                            Point a2 = (aa_index < ab_index) ? newSegment.b : newSegment.a;
+                            Point b1 = (ba_index < bb_index) ? seg.a : seg.b;
+                            Point b2 = (ba_index < bb_index) ? seg.b : seg.a;
+                            testIter.previous();
+                            testIter.remove();
+                            toBreak = true;
+                            if (Collision.is(a1, b1)) {
+                                testIter.add(new Segment(a1, a2));
+                                testIter.add(new Segment(a2, b2));
+                            } else if (Collision.is(a2, b2)) {
+                                testIter.add(new Segment(b1, a1));
+                                testIter.add(new Segment(a1, a2));
+                            } else {
+                                throw new RuntimeException();
+                            }
+                            testIter.previous();
+                            testIter.previous();
+                            newSegments.remove(i);
+                            i--;
+                            break;
+                        }
+                        case OUT: {
+                            //replace newSegment with the two non-common parts
+                            int aa_index = r.indices[0];
+                            int ab_index = r.indices[1];
+                            int ba_index = r.indices[2];
+                            int bb_index = r.indices[3];
+                            Point a1 = (aa_index < ab_index) ? newSegment.a : newSegment.b;
+                            Point a2 = (aa_index < ab_index) ? newSegment.b : newSegment.a;
+                            Point b1 = (ba_index < bb_index) ? seg.a : seg.b;
+                            Point b2 = (ba_index < bb_index) ? seg.b : seg.a;
+                            newSegments.remove(i);
+                            i--;
+                            newSegments.add(new Segment(a1, b1));
+                            newSegments.add(new Segment(b2, a2));
+                            break;
+                        }
+                        case OUT_CONNECTED:
+                            //replace newSegment with the non-common part
+                            int aa_index = r.indices[0];
+                            int ab_index = r.indices[1];
+                            int ba_index = r.indices[2];
+                            int bb_index = r.indices[3];
+                            Point a1 = (aa_index < ab_index) ? newSegment.a : newSegment.b;
+                            Point a2 = (aa_index < ab_index) ? newSegment.b : newSegment.a;
+                            Point b1 = (ba_index < bb_index) ? seg.a : seg.b;
+                            Point b2 = (ba_index < bb_index) ? seg.b : seg.a;
+                            if (Collision.is(a1, b1)) {
+                                newSegments.set(i, new Segment(b2, a2));
+                            } else if (Collision.is(a2, b2)) {
+                                newSegments.set(i, new Segment(a1, b1));
+                            } else {
+                                throw new RuntimeException();
+                            }
+                            i--;
+                            break;
+                        case SAME:
+                            newSegments.remove(i);
+                            i--;
+                            break;
+                        case CONNECTED:
+                            break;
+                        case NONE:
+                            break;
                     }
-
+                    if (toBreak) {
+                        break;
+                    }
                 }
-            }
-
+            } //new segment tested
+            currentSegments.addAll(newSegments);
         }
 
-        //save polygons for testing
-        Polygon p1 = segmentToPolygon(s1l);
-        List<Polygon> p2l = new ArrayList<>();
-        for (List<Segment> s2l : s2ll) {
-            p2l.add(segmentToPolygon(s2l));
-        }
+        return new HashSet<>(currentSegments);
+    }
 
-        //clear group segments in polygon
-        for (List<Segment> s2l : s2ll) {
-            for (Iterator<Segment> iterator = s2l.iterator(); iterator.hasNext(); ) {
-                Segment s2 = iterator.next();
-                if (Collision.in(s2, p1)) {
-                    iterator.remove();
-                }
+    private static Point getCachedPoint(Set<Point> allPoints, Point a) {
+        if (allPoints.contains(a)) return a;
+
+        Point to = a;
+        for (Point b : allPoints) {
+            if (Collision.is(a, b)) {
+                to = b;
+                break;
             }
         }
-
-        //clear polygon segments in group
-        //using saved polygons "p2l"
-        for (Iterator<Segment> iterator = s1l.iterator(); iterator.hasNext(); ) {
-            Segment s1 = iterator.next();
-
-            boolean in = false;
-            for (Polygon p2 : p2l) {
-                if (Collision.in(s1, p2)) {
-                    in = true;
-                    break;
-                }
-            }
-            if (in) {
-                iterator.remove();
-            }
-        }
-
-        //add to graph
-        Map<Point, List<Point>> graph = new HashMap<>();
-        for (Segment s1 : s1l) {
-            addMultiMap(graph, s1.a, s1.b);
-            addMultiMap(graph, s1.b, s1.a);
-        }
-        for (List<Segment> s2l : s2ll) {
-            for (Segment s2 : s2l) {
-                addMultiMap(graph, s2.a, s2.b);
-                addMultiMap(graph, s2.b, s2.a);
-            }
-        }
-
-        //basic checking
-        for (Map.Entry<Point, List<Point>> e : graph.entrySet()) {
-            if (e.getValue().size() != 2) {
-                System.out.println("fail");
-            }
-        }
-
-        //grab rings one by one
-        List<Polygon> result = new ArrayList<>();
-        while (!graph.isEmpty()) {
-            List<Point> list = grabFromGraph(graph);
-            result.add(new Polygon(list));
-        }
-
-        return new MultiPolygon(result);
+        allPoints.add(to);
+        return to;
     }
 
     private static <T> void addMultiMap(Map<T, List<T>> graph, T key, T value) {
