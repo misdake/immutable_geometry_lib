@@ -36,10 +36,10 @@ public class UnionTest {
     private static Polygon p2 = new Polygon(new float[]{1, 1, 3, 1, 3, 3, 1, 3});
 
     /*
-     * ┌──┐
-     * │ ┌┼┐ p4
-     * │ └┼┘
-     * └──┘
+     * ┌───┐
+     * │ ┌─┼─┐ p4
+     * │ └─┼─┘
+     * └───┘
      * p3
      */
     private static Polygon p3 = new Polygon(new float[]{0, 0, 2, 0, 2, 3, 0, 3});
@@ -91,7 +91,6 @@ public class UnionTest {
     }
 
     @Test
-    @Ignore
     public void simplePolygonUnionMultiPolygon() {
         polygonUnionPolygon(p1, p2, new float[]{0, 0, 2, 0, 2, 1, 3, 1, 3, 3, 1, 3, 1, 2, 0, 2});
         polygonUnionPolygon(p3, p4, new float[]{0, 0, 2, 0, 2, 1, 3, 1, 3, 2, 2, 2, 2, 3, 0, 3});
@@ -99,14 +98,13 @@ public class UnionTest {
     }
 
     @Test
-    @Ignore
     public void complexPolygonUnionMultiPolygon() {
         polygonUnionPolygon(p1, p1, new float[]{0, 0, 2, 0, 2, 2, 0, 2});
-        polygonUnionPolygon(p1, p7, new float[]{0, 0, 4, 0, 4, 2, 0, 2});
-        polygonUnionPolygon(p1, p7_1, new float[]{0, 0, 4, 0, 4, 2, 0, 2});
-        polygonUnionPolygon(p4, p6, new float[]{0, 1, 3, 1, 3, 2, 0, 2});
-        polygonUnionPolygon(p1, p5, new float[]{0, 0, 2, 0, 2, 3, 1, 3, 1, 2, 0, 2});
-        polygonUnionPolygon(p1, p8, new float[]{0, 0, 3, 0, 3, 2, 0, 2});
+        polygonUnionPolygon(p1, p7, new float[]{0, 0, 2, 0, 4, 0, 4, 2, 2, 2, 0, 2});
+        polygonUnionPolygon(p1, p7_1, new float[]{0, 0, 2, 0, 4, 0, 4, 2, 2, 2, 0, 2});
+        polygonUnionPolygon(p4, p6, new float[]{0, 1, 1, 1, 3, 1, 3, 2, 1, 2, 0, 2});
+        polygonUnionPolygon(p1, p5, new float[]{0, 0, 1, 0, 2, 0, 2, 2, 2, 3, 1, 3, 1, 2, 0, 2});
+        polygonUnionPolygon(p1, p8, new float[]{0, 0, 1, 0, 2, 0, 3, 0, 3, 2, 2, 2, 1, 2, 0, 2});
     }
 
     private static void polygonUnionPolygon(Polygon a, Polygon b, float[] reference) {

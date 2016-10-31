@@ -19,32 +19,63 @@ import java.util.Set;
 
 public class Union {
     public static MultiPolygon unionWithoutHoles(Collection<Polygon> polygons) {
-        //prepare segments
-        Set<Point> allPoints = new HashSet<>();
-        Map<Point, Point> pointMap = new HashMap<>();
-        //add points to allPoints
-        for (Polygon polygon : polygons) {
-            for (Point a : polygon.points) {
-                Point to = getCachedPoint(allPoints, a);
-                pointMap.put(a, to);
-            }
-        }
         //add segments to allSegments
         List<Segment> allSegments = new ArrayList<>();
         for (Polygon polygon : polygons) {
             allSegments.addAll(polygon.segments);
         }
 
+        //generate plain segments
         Set<Segment> segments = unionSegments(allSegments);
 
-        //TODO reconstruct graph
-        //TODO while graph not empty
-        //TODO     gather sub-graph
-        //TODO     remove sub-graph from graph
-        //TODO     generate outline of sub-graph using customized ConvexHull
-        //TODO     add outline to result set
+        //reconstruct graph
+        Set<Point> allPoints = new HashSet<>();
+        final Map<Point, List<Point>> graph = new HashMap<>();
+        for (Segment segment : segments) {
+            Point a = getCachedPoint(allPoints, segment.a);
+            Point b = getCachedPoint(allPoints, segment.b);
+            addMultiMap(graph, a, b);
+            addMultiMap(graph, b, a);
+        }
 
-        return null;
+        List<Polygon> r = new ArrayList<>();
+        //extract sub-graph one by one
+        while (!graph.isEmpty()) {
+
+            //gather sub-graph
+            Queue<Point> queue = new ArrayDeque<>();
+            List<Point> points = new ArrayList<>();
+            Point first = graph.keySet().iterator().next();
+            queue.add(first);
+            while (!queue.isEmpty()) {
+                Point p = queue.poll();
+                points.add(p);
+                List<Point> list = graph.get(p);
+                for (Point point : list) {
+                    if (!queue.contains(point) && !points.contains(point)) {
+                        queue.add(point);
+                    }
+                }
+            }
+
+            //generate outline of sub-graph using customized ConvexHull
+            Polygon polygon = ConvexHull.convexHull_misdake(points, graph);
+            r.add(polygon);
+
+            //remove sub-graph from graph
+            for (Point point : points) {
+                graph.remove(point);
+            }
+            //remove points inside
+            List<Point> left = new ArrayList<>(graph.keySet());
+            for (Point point : left) {
+                if (Collision.in(point, polygon)) {
+                    graph.remove(point);
+                }
+            }
+        }
+
+        return new MultiPolygon(r);
     }
 
     public static Set<Segment> unionSegments(Collection<Segment> allSegments) {
@@ -79,13 +110,11 @@ public class Union {
                         case INTERSECTED: {
                             //cut each in 2
                             Point point = getCachedPoint(allPoints, r.point);
-                            //replace seg with two segments and skip them.
                             testIter.previous();
                             testIter.remove();
                             toBreak = true;
                             if (!Collision.is(seg.a, point)) testIter.add(new Segment(seg.a, point));
                             if (!Collision.is(point, seg.b)) testIter.add(new Segment(point, seg.b));
-                            //replace newSegment with two segments and continue with the first one (then the second one).
                             if (!Collision.is(newSegment.a, point)) newSegments.set(i, new Segment(newSegment.a, point));
                             if (!Collision.is(point, newSegment.b)) newSegments.add(i + 1, new Segment(point, newSegment.b));
                             break;

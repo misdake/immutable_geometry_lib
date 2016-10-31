@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 public class ConvexHull {
     public static Polygon convexHull_JarvisMarch(Collection<Point> points) {
@@ -85,6 +86,42 @@ public class ConvexHull {
             float max = -1000;
             Point maxPoint = null;
             for (Point point : array) {
+                if (!r.contains(point) && (r.size() > 2 || point != start)) {
+                    float v = angle(prev, curr, point);
+                    if (v > max) {
+                        max = v;
+                        maxPoint = point;
+                    }
+                }
+            }
+            if (maxPoint == start) break;
+            r.add(maxPoint);
+            prev = curr;
+            curr = maxPoint;
+        }
+
+        r.add(start);
+        return new Polygon(r);
+    }
+    public static Polygon convexHull_misdake(Collection<Point> points, Map<Point, List<Point>> graph) {
+        Point[] array = points.toArray(new Point[points.size()]);
+        Arrays.sort(array, ANDREW_MONOTONE_CHAIN_COMPARATOR);
+
+        List<Point> r = new ArrayList<>();
+        Point prev = array[0];
+        Point curr = array[1];
+        if (prev.y < curr.y) {
+            Point t = prev;
+            prev = curr;
+            curr = t;
+        }
+        r.add(curr);
+        Point start = prev;
+
+        for (; ; ) {
+            float max = -1000;
+            Point maxPoint = null;
+            for (Point point : graph.get(curr)) {
                 if (!r.contains(point) && (r.size() > 2 || point != start)) {
                     float v = angle(prev, curr, point);
                     if (v > max) {
