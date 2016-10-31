@@ -66,6 +66,81 @@ public class ConvexHull {
         return new Polygon(list);
     }
 
+    public static Polygon convexHull_misdake(Collection<Point> points) {
+        Point[] array = points.toArray(new Point[points.size()]);
+        Arrays.sort(array, ANDREW_MONOTONE_CHAIN_COMPARATOR);
+
+        List<Point> r = new ArrayList<>();
+        Point prev = array[0];
+        Point curr = array[1];
+        if (prev.y < curr.y) {
+            Point t = prev;
+            prev = curr;
+            curr = t;
+        }
+        r.add(curr);
+        Point start = prev;
+
+        for (; ; ) {
+            float max = -1000;
+            Point maxPoint = null;
+            for (Point point : array) {
+                if (!r.contains(point) && (r.size() > 2 || point != start)) {
+                    float v = angle(prev, curr, point);
+                    if (v > max) {
+                        max = v;
+                        maxPoint = point;
+                    }
+                }
+            }
+            if (maxPoint == start) break;
+            r.add(maxPoint);
+            prev = curr;
+            curr = maxPoint;
+        }
+
+        r.add(start);
+        return new Polygon(r);
+    }
+
+    private static float angle(Point v1, Point v2, Point v3) {
+        // b:v1~v2,
+        // c:v2~v3,
+        // a:v1~v3
+        boolean cw = cross(v1, v2, v3) > 0;
+        float dx1 = v2.x - v1.x, dy1 = v2.y - v1.y;
+        float dx2 = v3.x - v2.x, dy2 = v3.y - v2.y;
+        float dx3 = dx1 - dx2, dy3 = dy1 - dy2;
+        float dl1 = dx1 * dx1 + dy1 * dy1;
+        float dl2 = dx2 * dx2 + dy2 * dy2;
+        float dl3 = dx3 * dx3 + dy3 * dy3;
+
+        double dl1r = Math.sqrt(dl1);
+        if (dl1r == 0)
+            return 0;
+        double dl2r = Math.sqrt(dl2);
+        if (dl2r == 0)
+            return 0;
+
+        double cosAlpha = (dl1 + dl2 - dl3) / dl1r / dl2r / 2;
+
+        if (cosAlpha > 1)
+            cosAlpha = 1;
+        if (cosAlpha < -1)
+            cosAlpha = -1;
+
+        float alpha = (float) Math.acos(cosAlpha);
+
+        if (alpha == Double.NaN)
+            return 0;
+
+        if (cw) {
+            return (float) -Math.toDegrees(alpha);
+        } else {
+            return (float) Math.toDegrees(alpha);
+        }
+    }
+
     private static float cross(Point o, Point a, Point b) {
         return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
     }
