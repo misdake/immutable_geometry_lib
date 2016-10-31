@@ -13,16 +13,6 @@ import java.util.List;
 public class ConvexHull {
     public static Polygon convexHull_JarvisMarch(Collection<Point> points) {
         Point[] array = points.toArray(new Point[points.size()]);
-        final List<Point> list = Arrays.asList(array);
-        return convexHull_JarvisMarch(array, new NextPossible_JarvisMarch() {
-            @Override
-            public Collection<Point> getNext(Point point) {
-                return list;
-            }
-        });
-    }
-
-    private static Polygon convexHull_JarvisMarch(Point[] array, NextPossible_JarvisMarch nextPossible) {
 
         int start = 0;
         for (int i = 1; i < array.length; i++) {
@@ -34,24 +24,20 @@ public class ConvexHull {
         List<Point> r = new ArrayList<>();
         r.add(array[start]);
 
-        for (int m = 0; true; ++m) {
-            Point curr = r.get(m);
-            Point next = array[start];
-            Collection<Point> possible = nextPossible.getNext(curr);
-            for (Point point : possible) {
-                float c = crossDirection(curr, point, next);
-                if (c > Constants.EPSILON || Math.abs(c) < Constants.EPSILON && far(curr, point, next)) {
-                    next = point;
+        for (int m = 1; true; ++m) {
+            int next = start;
+            for (int i = 0; i < array.length; i++) {
+                Point point = array[i];
+                float c = crossDirection(r.get(m - 1), point, array[next]);
+                if (c > Constants.EPSILON || Math.abs(c) < Constants.EPSILON && far(r.get(m - 1), point, array[next])) {
+                    next = i;
                 }
             }
-            if (next == array[start]) break;
-            r.add(next);
+            if (next == start) break;
+            r.add(array[next]);
         }
 
         return new Polygon(array);
-    }
-    public interface NextPossible_JarvisMarch {
-        Collection<Point> getNext(Point point);
     }
 
     public static Polygon convexHull_AndrewMonotoneChain(Collection<Point> points) {
