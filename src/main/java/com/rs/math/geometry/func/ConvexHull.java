@@ -7,6 +7,7 @@ import com.rs.math.geometry.shape.Polygon;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 
 public class ConvexHull {
@@ -53,6 +54,32 @@ public class ConvexHull {
         Collection<Point> getNext(Point point);
     }
 
+    public static Polygon convexHull_AndrewMonotoneChain(Collection<Point> points) {
+        Point[] P = points.toArray(new Point[0]);
+        Point[] L = new Point[P.length];
+        Point[] U = new Point[P.length];
+
+        Arrays.sort(P, ANDREW_MONOTONE_CHAIN_COMPARATOR);
+
+        int l = 0, u = 0;   // 下凸包的點數、上凸包的點數
+        for (int i = 0; i < P.length; ++i) {
+            while (l >= 2 && cross(L[l - 2], L[l - 1], P[i]) <= 0) l--;
+            while (u >= 2 && cross(U[u - 2], U[u - 1], P[i]) >= 0) u--;
+            L[l++] = P[i];
+            U[u++] = P[i];
+        }
+
+        List<Point> list = new ArrayList<>();
+        for (int i = 0; i < l; i++) {
+            list.add(L[i]);
+        }
+        for (int i = u - 2; i >= 1; i--) {
+            list.add(U[i]);
+        }
+
+        return new Polygon(list);
+    }
+
     private static float cross(Point o, Point a, Point b) {
         return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
     }
@@ -79,4 +106,12 @@ public class ConvexHull {
         int c = compare(a.y, b.y);
         return c != 0 ? c : compare(a.x, b.x);
     }
+
+    private final static Comparator<Point> ANDREW_MONOTONE_CHAIN_COMPARATOR = new Comparator<Point>() {
+        @Override
+        public int compare(Point a, Point b) {
+            int c = Float.compare(a.x, b.x);
+            return c != 0 ? c : Float.compare(a.y, b.y);
+        }
+    };
 }
