@@ -1,5 +1,6 @@
 package com.rs.math.geometry.func;
 
+import com.rs.math.geometry.Constants;
 import com.rs.math.geometry.shape.MultiPolygon;
 import com.rs.math.geometry.shape.Point;
 import com.rs.math.geometry.shape.Polygon;
@@ -22,7 +23,11 @@ public class Union {
         //add segments to allSegments
         List<Segment> allSegments = new ArrayList<>();
         for (Polygon polygon : polygons) {
-            allSegments.addAll(polygon.segments);
+            for (Segment segment : polygon.segments) {
+                if (segment.length() > Constants.EPSILON) {
+                    allSegments.add(segment);
+                }
+            }
         }
 
         //generate plain segments
@@ -294,44 +299,6 @@ public class Union {
     private static <T> void addMultiMap(Map<T, List<T>> graph, T key, T value) {
         List<T> l = graph.get(key);
         if (l == null) graph.put(key, l = new ArrayList<>());
-        l.add(value);
-    }
-    private static <T> List<T> grabFromGraph(Map<T, List<T>> graph) {
-        List<T> r = new ArrayList<>();
-        if (graph.isEmpty()) return r;
-        T current = graph.keySet().iterator().next();
-
-        for (; ; ) {
-            r.add(current);
-            List<T> list = graph.get(current);
-            graph.remove(current);
-            T next = null;
-            for (T t : list) {
-                if (graph.containsKey(t)) {
-                    next = t;
-                    break;
-                }
-            }
-            if (next == null) {
-                return r;
-            }
-            current = next;
-        }
-    }
-
-    private static Polygon segmentToPolygon(List<Segment> segments) {
-        List<Point> points = new ArrayList<>();
-        for (Segment segment : segments) {
-            points.add(segment.a);
-        }
-        return new Polygon(points);
-    }
-
-    private static void insert(List<Segment> list, int i, Point t) {
-        Segment s = list.get(i);
-        Point a = s.a;
-        Point b = s.b;
-        list.set(i, new Segment(a, t));
-        list.add(i + 1, new Segment(t, b));
+        if (!l.contains(value)) l.add(value);
     }
 }

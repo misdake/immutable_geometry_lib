@@ -57,21 +57,22 @@ public class UnionTest {
     private static Polygon p6 = new Polygon(new float[]{0, 1, 3, 1, 3, 2, 0, 2});
 
     /*
-     * ┌───┬───┐
-     * │   │   │
-     * └───┴───┘
-     *  p1   p7
+     * ┌───┬───┬───┐
+     * │   │   │   │
+     * └───┴───┴───┘
+     *  p1  p7  p8
      */
     private static Polygon p7   = new Polygon(new float[]{2, 0, 4, 0, 4, 2, 2, 2});
     private static Polygon p7_1 = new Polygon(new float[]{2.00001f, 0, 4.00001f, 0, 4.00001f, 2, 2.00001f, 2});
+    private static Polygon p8   = new Polygon(new float[]{4, 0, 6, 0, 6, 2, 4, 2});
 
     /*
      * ┌─┬─┬─┐
      * │ │ │ │
      * └─┴─┴─┘
-     *  p1 p8
+     *  p1 p9
      */
-    private static Polygon p8 = new Polygon(new float[]{1, 0, 3, 0, 3, 2, 1, 2});
+    private static Polygon p9 = new Polygon(new float[]{1, 0, 3, 0, 3, 2, 1, 2});
 
     @Test
     public void simpleSegmentUnion() {
@@ -80,7 +81,7 @@ public class UnionTest {
         segmentUnion(p5, p6, 16);
         segmentUnion(p1, p7, 7);
         segmentUnion(p1, p7_1, 7);
-        segmentUnion(p1, p8, 10);
+        segmentUnion(p1, p9, 10);
     }
     private void segmentUnion(Polygon p1, Polygon p2, int expectedSegmentCount) {
         Set<Segment> allSegments = new HashSet<>();
@@ -105,12 +106,16 @@ public class UnionTest {
         unionPolygonsPoint(p1, p7_1, new float[]{0, 0, 4, 0, 4, 2, 0, 2});
         unionPolygonsPoint(p4, p6, new float[]{0, 1, 3, 1, 3, 2, 0, 2});
         unionPolygonsPoint(p1, p5, new float[]{0, 0, 2, 0, 2, 3, 1, 3, 1, 2, 0, 2});
-        unionPolygonsPoint(p1, p8, new float[]{0, 0, 3, 0, 3, 2, 0, 2});
+        unionPolygonsPoint(p1, p9, new float[]{0, 0, 3, 0, 3, 2, 0, 2});
     }
 
     @Test
     public void complexUnionMultiPolygon() {
-        unionPolygonsCount(new int[]{4, 8}, p0, p1, p2);
+//        unionPolygonsCount(new int[]{4, 8}, p0, p1, p2);
+//        unionPolygonsCount(new int[]{4, 4}, p0, p1, p4, p7);
+//        unionPolygonsCount(new int[]{4, 4}, p0, p1, p7, p9);
+//        unionPolygonsCount(new int[]{10}, p1, p5, p6);
+        unionPolygonsCount(new int[]{4, 4, 8}, p0, p1, p2, p8);
     }
 
     private static void unionPolygonsPoint(Polygon a, Polygon b, float[] reference) {
