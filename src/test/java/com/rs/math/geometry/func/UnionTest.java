@@ -4,9 +4,9 @@ import com.rs.math.geometry.shape.MultiPolygon;
 import com.rs.math.geometry.shape.Point;
 import com.rs.math.geometry.shape.Polygon;
 import com.rs.math.geometry.shape.Segment;
-import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -32,6 +32,7 @@ public class UnionTest {
      * └───┘
      *  p1
      */
+    private static Polygon p0 = new Polygon(new float[]{-5, -5, -3, -5, -3, -3, -5, -3});
     private static Polygon p1 = new Polygon(new float[]{0, 0, 2, 0, 2, 2, 0, 2});
     private static Polygon p2 = new Polygon(new float[]{1, 1, 3, 1, 3, 3, 1, 3});
 
@@ -92,22 +93,27 @@ public class UnionTest {
 
     @Test
     public void simplePolygonUnionMultiPolygon() {
-        polygonUnionPolygon(p1, p2, new float[]{0, 0, 2, 0, 2, 1, 3, 1, 3, 3, 1, 3, 1, 2, 0, 2});
-        polygonUnionPolygon(p3, p4, new float[]{0, 0, 2, 0, 2, 1, 3, 1, 3, 2, 2, 2, 2, 3, 0, 3});
-        polygonUnionPolygon(p5, p6, new float[]{1, 0, 2, 0, 2, 1, 3, 1, 3, 2, 2, 2, 2, 3, 1, 3, 1, 2, 0, 2, 0, 1, 1, 1});
+        unionPolygonsPoint(p1, p2, new float[]{0, 0, 2, 0, 2, 1, 3, 1, 3, 3, 1, 3, 1, 2, 0, 2});
+        unionPolygonsPoint(p3, p4, new float[]{0, 0, 2, 0, 2, 1, 3, 1, 3, 2, 2, 2, 2, 3, 0, 3});
+        unionPolygonsPoint(p5, p6, new float[]{1, 0, 2, 0, 2, 1, 3, 1, 3, 2, 2, 2, 2, 3, 1, 3, 1, 2, 0, 2, 0, 1, 1, 1});
     }
 
     @Test
     public void complexPolygonUnionMultiPolygon() {
-        polygonUnionPolygon(p1, p1, new float[]{0, 0, 2, 0, 2, 2, 0, 2});
-        polygonUnionPolygon(p1, p7, new float[]{0, 0, 2, 0, 4, 0, 4, 2, 2, 2, 0, 2});
-        polygonUnionPolygon(p1, p7_1, new float[]{0, 0, 2, 0, 4, 0, 4, 2, 2, 2, 0, 2});
-        polygonUnionPolygon(p4, p6, new float[]{0, 1, 1, 1, 3, 1, 3, 2, 1, 2, 0, 2});
-        polygonUnionPolygon(p1, p5, new float[]{0, 0, 1, 0, 2, 0, 2, 2, 2, 3, 1, 3, 1, 2, 0, 2});
-        polygonUnionPolygon(p1, p8, new float[]{0, 0, 1, 0, 2, 0, 3, 0, 3, 2, 2, 2, 1, 2, 0, 2});
+        unionPolygonsPoint(p1, p1, new float[]{0, 0, 2, 0, 2, 2, 0, 2});
+        unionPolygonsPoint(p1, p7, new float[]{0, 0, 4, 0, 4, 2, 0, 2});
+        unionPolygonsPoint(p1, p7_1, new float[]{0, 0, 4, 0, 4, 2, 0, 2});
+        unionPolygonsPoint(p4, p6, new float[]{0, 1, 3, 1, 3, 2, 0, 2});
+        unionPolygonsPoint(p1, p5, new float[]{0, 0, 2, 0, 2, 3, 1, 3, 1, 2, 0, 2});
+        unionPolygonsPoint(p1, p8, new float[]{0, 0, 3, 0, 3, 2, 0, 2});
     }
 
-    private static void polygonUnionPolygon(Polygon a, Polygon b, float[] reference) {
+    @Test
+    public void complexUnionMultiPolygon() {
+        unionPolygonsCount(new int[]{4, 8}, p0, p1, p2);
+    }
+
+    private static void unionPolygonsPoint(Polygon a, Polygon b, float[] reference) {
         MultiPolygon r = Union.unionWithoutHoles(Arrays.asList(a, b));
         assertNotNull(r);
         assertEquals(1, r.polygons.size());
@@ -117,6 +123,22 @@ public class UnionTest {
         assertEquals(referenceResult.points.size(), points.size());
 
         TestUtil.polygonEqual(points, referenceResult.points);
+    }
+
+    private static void unionPolygonsCount(int[] reference, Polygon... polygons) {
+        MultiPolygon r = Union.unionWithoutHoles(Arrays.asList(polygons));
+        assertNotNull(r);
+        assertEquals(reference.length, r.polygons.size());
+
+        List<Integer> list = new ArrayList<>();
+        for (int i : reference) {
+            list.add(i);
+        }
+        for (Polygon polygon : r.polygons) {
+            int i = list.indexOf(polygon.points.size());
+            assertTrue(i >= 0);
+            list.remove(i);
+        }
     }
 
 }

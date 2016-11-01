@@ -60,7 +60,8 @@ public class Union {
 
             //generate outline of sub-graph using customized ConvexHull
             Polygon polygon = ConvexHull.convexHull_misdake(points, graph);
-            r.add(polygon);
+            Polygon refined = refine(polygon);
+            r.add(refined);
 
             //remove sub-graph from graph
             for (Point point : points) {
@@ -76,6 +77,21 @@ public class Union {
         }
 
         return new MultiPolygon(r);
+    }
+
+    private static Polygon refine(Polygon input) {
+        List<Point> points = input.points;
+        List<Point> r = new ArrayList<>(points);
+        int size = points.size();
+        for (int i = 0; i < size; i++) {
+            Point p0 = points.get((i + 0) % size);
+            Point p1 = points.get((i + 1) % size);
+            Point p2 = points.get((i + 2) % size);
+            if(Collision.on(p1, new Segment(p0, p2))) {
+                r.remove(p1);
+            }
+        }
+        return new Polygon(r);
     }
 
     public static Set<Segment> unionSegments(Collection<Segment> allSegments) {
