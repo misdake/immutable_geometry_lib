@@ -6,6 +6,7 @@ import com.rs.math.geometry.shape.Line;
 import com.rs.math.geometry.shape.Point;
 import com.rs.math.geometry.shape.Polygon;
 import com.rs.math.geometry.shape.Segment;
+import com.rs.math.geometry.value.Normal;
 import com.rs.math.geometry.value.Vector;
 
 import java.util.List;
@@ -88,9 +89,12 @@ public class Collision {
         Point b2 = b.b;
         Vector va = new Vector(a1, a2);
         Vector vb = new Vector(b1, b2);
-        //TODO is <Constants.EPSILON enough?
-        boolean ta = Vector.cross(va, new Vector(a1, b1)) * Vector.cross(va, new Vector(a1, b2)) < Constants.EPSILON;
-        boolean tb = Vector.cross(vb, new Vector(b1, a1)) * Vector.cross(vb, new Vector(b1, a2)) < Constants.EPSILON;
+        float la = va.length();
+        float lb = vb.length();
+        float v1 = Vector.cross(va, new Normal(a1, b1)) * Vector.cross(va, new Normal(a1, b2));
+        float v2 = Vector.cross(vb, new Normal(b1, a1)) * Vector.cross(vb, new Normal(b1, a2));
+        boolean ta = Float.isNaN(v1) || v1 <= Constants.EPSILON_STABLE * la * la;
+        boolean tb = Float.isNaN(v2) || v2 <= Constants.EPSILON_STABLE * lb * lb;
         return ta && tb;
     }
 
@@ -152,24 +156,23 @@ public class Collision {
         Line line = s.getLine();
         float distance = Distance.distance(p, line);
         if (distance > Constants.EPSILON) return false;
-        float dot = Vector.dot(v, line.direction);
-        boolean inSegment = dot <= maxLength + Constants.EPSILON && dot >= -Constants.EPSILON;
+        float dot = Vector.dot(v, line.direction) / maxLength;
+        boolean inSegment = dot <= 1 + Constants.EPSILON_STABLE && dot >= -Constants.EPSILON_STABLE;
         return inSegment;
     }
     private static boolean on_trusted(Point p, Segment s) {
         float maxLength = s.length();
         Vector v = new Vector(s.a, p);
         Line line = s.getLine();
-        float dot = Vector.dot(v, line.direction);
-        boolean inSegment = dot <= maxLength + Constants.EPSILON && dot >= -Constants.EPSILON;
+        float dot = Vector.dot(v, line.direction) / maxLength;
+        boolean inSegment = dot <= 1 + Constants.EPSILON_STABLE && dot >= -Constants.EPSILON_STABLE;
         return inSegment;
     }
     private static float on_length(Point p, Segment s) {
-        float maxLength = s.length();
         Vector v = new Vector(s.a, p);
         Line line = s.getLine();
         float dot = Vector.dot(v, line.direction);
-        return dot / maxLength;
+        return dot;
     }
 
     public static boolean on(Point p, Polygon polygon) {
@@ -191,18 +194,23 @@ public class Collision {
 
         float length = v1.length();
         float length2 = v2.length();
-        if (length < Constants.EPSILON && length2 < Constants.EPSILON) {
+        if (length <= Constants.EPSILON && length2 <= Constants.EPSILON && Math.abs(v1.length()-v2.length()) < Constants.EPSILON_STABLE) {
             // point a is on line b => SAME
             return new SegmentResult(SAME);
         }
 
-        float direction = Vector.dot(v1, a.direction);
-        if (Math.abs(direction) < Constants.EPSILON) {
-            // projection (point a -> line b) direction is perpendicular to line a => parallel => NONE
-            return new SegmentResult(NONE);
+        float direction;
+        if (length > Constants.EPSILON) {
+            direction = Vector.dot(v1, a.direction) / length;
+            if (Math.abs(direction) < Constants.EPSILON_STABLE) {
+                // projection (point a -> line b) direction is perpendicular to line a => parallel => NONE
+                return new SegmentResult(NONE);
+            }
+        } else {
+            direction = Vector.dot(v2, a.direction) / length2;
         }
 
-        float t = length * length / direction;
+        float t = length / direction;
         float x = a.point.x + a.direction.x * t;
         float y = a.point.y + a.direction.y * t;
         return new SegmentResult(INTERSECTED, new Point(x, y));
@@ -270,8 +278,9 @@ public class Collision {
         float max_a = Math.max(length_aa_b, length_ab_b);
         boolean ab = length_aa_b < length_ab_b;
 
-        int s1 = status(min_a, 0, 1);
-        int s2 = status(max_a, 0, 1);
+        float length = b.length();
+        int s1 = status(min_a, 0, length);
+        int s2 = status(max_a, 0, length);
 
         SegmentResult x = getSegmentResult(s1, s2, a, b);
         if (!ab && x.indices != null) {

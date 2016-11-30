@@ -24,7 +24,7 @@ public class Union {
         List<Segment> allSegments = new ArrayList<>();
         for (Polygon polygon : polygons) {
             for (Segment segment : polygon.segments) {
-                if (segment.length() > Constants.EPSILON) {
+                if (segment.length() > 2 * Constants.EPSILON) {
                     allSegments.add(segment);
                 }
             }
@@ -136,8 +136,9 @@ public class Union {
                             toBreak = true;
                             if (!Collision.is(seg.a, point)) testIter.add(new Segment(seg.a, point));
                             if (!Collision.is(point, seg.b)) testIter.add(new Segment(point, seg.b));
-                            if (!Collision.is(newSegment.a, point)) newSegments.set(i, new Segment(newSegment.a, point));
-                            if (!Collision.is(point, newSegment.b)) newSegments.add(i + 1, new Segment(point, newSegment.b));
+                            newSegments.remove(i);
+                            if (!Collision.is(newSegment.a, point)) newSegments.add(i, new Segment(newSegment.a, point));
+                            if (!Collision.is(point, newSegment.b)) newSegments.add(i, new Segment(point, newSegment.b));
                             break;
                         }
                         case INTERLEAVED: {
