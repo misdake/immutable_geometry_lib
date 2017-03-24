@@ -4,12 +4,7 @@ import com.rs.math.geometry.Constants;
 import com.rs.math.geometry.shape.Point;
 import com.rs.math.geometry.shape.Polygon;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ConvexHull {
     public static Polygon convexHull_JarvisMarch(Collection<Point> points) {
@@ -46,7 +41,7 @@ public class ConvexHull {
         Point[] L = new Point[P.length];
         Point[] U = new Point[P.length];
 
-        Arrays.sort(P, ANDREW_MONOTONE_CHAIN_COMPARATOR);
+        Arrays.sort(P, POINT_COMPARATOR_LEFT_BOTTOM);
 
         int l = 0, u = 0;   // 下凸包的點數、上凸包的點數
         for (int i = 0; i < P.length; ++i) {
@@ -69,7 +64,7 @@ public class ConvexHull {
 
     public static Polygon convexHull_misdake(Collection<Point> points) {
         Point[] array = points.toArray(new Point[points.size()]);
-        Arrays.sort(array, ANDREW_MONOTONE_CHAIN_COMPARATOR);
+        Arrays.sort(array, POINT_COMPARATOR_LEFT_BOTTOM);
 
         List<Point> r = new ArrayList<>();
         Point prev = array[0];
@@ -105,7 +100,7 @@ public class ConvexHull {
     }
     public static Polygon convexHull_misdake(Collection<Point> points, Map<Point, List<Point>> graph) {
         Point[] array = points.toArray(new Point[points.size()]);
-        Arrays.sort(array, ANDREW_MONOTONE_CHAIN_COMPARATOR);
+        Arrays.sort(array, POINT_COMPARATOR_LEFT_BOTTOM);
 
         List<Point> r = new ArrayList<>();
         Point prev = array[0];
@@ -205,7 +200,7 @@ public class ConvexHull {
         return c != 0 ? c : compare(a.x, b.x);
     }
 
-    private final static Comparator<Point> ANDREW_MONOTONE_CHAIN_COMPARATOR = new Comparator<Point>() {
+    private final static Comparator<Point> POINT_COMPARATOR_LEFT_BOTTOM = new Comparator<Point>() {
         @Override
         public int compare(Point a, Point b) {
             int c = Float.compare(a.x, b.x);
