@@ -1,25 +1,13 @@
 package com.rs.math.geometry.func;
 
 import com.rs.math.geometry.Constants;
-import com.rs.math.geometry.shape.Circle;
-import com.rs.math.geometry.shape.Line;
-import com.rs.math.geometry.shape.Point;
-import com.rs.math.geometry.shape.Polygon;
-import com.rs.math.geometry.shape.Segment;
+import com.rs.math.geometry.shape.*;
 import com.rs.math.geometry.value.Normal;
 import com.rs.math.geometry.value.Vector;
 
 import java.util.List;
 
-import static com.rs.math.geometry.func.Collision.SegmentResultType.CONNECTED;
-import static com.rs.math.geometry.func.Collision.SegmentResultType.IN;
-import static com.rs.math.geometry.func.Collision.SegmentResultType.INTERLEAVED;
-import static com.rs.math.geometry.func.Collision.SegmentResultType.INTERSECTED;
-import static com.rs.math.geometry.func.Collision.SegmentResultType.IN_CONNECTED;
-import static com.rs.math.geometry.func.Collision.SegmentResultType.NONE;
-import static com.rs.math.geometry.func.Collision.SegmentResultType.OUT;
-import static com.rs.math.geometry.func.Collision.SegmentResultType.OUT_CONNECTED;
-import static com.rs.math.geometry.func.Collision.SegmentResultType.SAME;
+import static com.rs.math.geometry.func.Collision.SegmentResultType.*;
 
 public class Collision {
 
@@ -83,6 +71,16 @@ public class Collision {
     }
 
     public static boolean testPossible(Segment a, Segment b) {
+        float minax = Math.min(a.a.x, a.b.x) - Constants.EPSILON_STABLE;
+        float minay = Math.min(a.a.y, a.b.y) - Constants.EPSILON_STABLE;
+        float minbx = Math.min(b.a.x, b.b.x) - Constants.EPSILON_STABLE;
+        float minby = Math.min(b.a.y, b.b.y) - Constants.EPSILON_STABLE;
+        float maxax = Math.max(a.a.x, a.b.x) + Constants.EPSILON_STABLE;
+        float maxay = Math.max(a.a.y, a.b.y) + Constants.EPSILON_STABLE;
+        float maxbx = Math.max(b.a.x, b.b.x) + Constants.EPSILON_STABLE;
+        float maxby = Math.max(b.a.y, b.b.y) + Constants.EPSILON_STABLE;
+        if (maxax < minbx || maxay < minby || maxbx < minax || maxby < minay) return false;
+
         Point a1 = a.a;
         Point a2 = a.b;
         Point b1 = b.a;

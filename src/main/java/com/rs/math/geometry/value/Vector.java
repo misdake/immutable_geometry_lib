@@ -5,6 +5,11 @@ import com.rs.math.geometry.shape.Point;
 public class Vector {
     public final float x;
     public final float y;
+    Vector(float x, float y, float length) {
+        float l = length / (float) Math.hypot(x, y);
+        this.x = x * l;
+        this.y = y * l;
+    }
     public Vector(float x, float y) {
         this.x = x;
         this.y = y;

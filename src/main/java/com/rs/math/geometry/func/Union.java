@@ -119,9 +119,21 @@ public class Union {
         LinkedList<Segment> currentSegments = new LinkedList<>();
         while (!segmentsToAdd.isEmpty()) {
             List<Segment> newSegments = new ArrayList<>();
-            newSegments.add(segmentsToAdd.poll());
+            Segment oriNewSeg = segmentsToAdd.poll();
+            newSegments.add(oriNewSeg);
+
+            float minnx = Math.min(oriNewSeg.a.x, oriNewSeg.b.x) - Constants.EPSILON_STABLE;
+            float minny = Math.min(oriNewSeg.a.y, oriNewSeg.b.y) - Constants.EPSILON_STABLE;
+            float maxnx = Math.max(oriNewSeg.a.x, oriNewSeg.b.x) + Constants.EPSILON_STABLE;
+            float maxny = Math.max(oriNewSeg.a.y, oriNewSeg.b.y) + Constants.EPSILON_STABLE;
             for (ListIterator<Segment> testIter = currentSegments.listIterator(); testIter.hasNext(); ) {
                 Segment seg = testIter.next();
+                float mintx = Math.min(seg.a.x, seg.b.x) - Constants.EPSILON_STABLE;
+                float minty = Math.min(seg.a.y, seg.b.y) - Constants.EPSILON_STABLE;
+                float maxtx = Math.max(seg.a.x, seg.b.x) + Constants.EPSILON_STABLE;
+                float maxty = Math.max(seg.a.y, seg.b.y) + Constants.EPSILON_STABLE;
+
+                if (maxnx < mintx || maxny < minty || maxtx < minnx || maxty < minny) continue;
 
                 for (int i = 0; i < newSegments.size(); i++) {
                     Segment newSegment = newSegments.get(i);
