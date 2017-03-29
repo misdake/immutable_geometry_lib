@@ -6,7 +6,7 @@
 
     <groupId>com.rs.math</groupId>
     <artifactId>geometry</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.1-SNAPSHOT</version>
 
     <build>
         <plugins>
@@ -22,6 +22,11 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>org.orbisgis</groupId>
+            <artifactId>jdelaunay</artifactId>
+            <version>0.5.3</version>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

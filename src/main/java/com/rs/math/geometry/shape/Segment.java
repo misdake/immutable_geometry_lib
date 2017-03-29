@@ -18,4 +18,9 @@ public class Segment {
     public float length() {
         return Distance.distance(a, b);
     }
+
+    @Override
+    public String toString() {
+        return String.format("(%f, %f) - (%f, %f)", a.x, a.y, b.x, b.y);
+    }
 }
