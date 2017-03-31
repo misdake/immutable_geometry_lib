@@ -34,8 +34,8 @@ public class CdtTest {
         Point[] points = {
                 new Point(0, 0),
                 new Point(2, 2),
-                new Point(0.5f, 1),
-                new Point(1.5f, 1),
+                new Point(0.5, 1),
+                new Point(1.5, 1),
                 new Point(2, 0),
                 new Point(0, 2),
         };

@@ -24,7 +24,7 @@ public class ConvexHull {
             int next = start;
             for (int i = 0; i < array.length; i++) {
                 Point point = array[i];
-                float c = L.crossDirection(r.get(m - 1), point, array[next]);
+                double c = L.crossDirection(r.get(m - 1), point, array[next]);
                 if (c > Constants.EPSILON || Math.abs(c) < Constants.EPSILON && L.far(r.get(m - 1), point, array[next])) {
                     next = i;
                 }
@@ -78,11 +78,11 @@ public class ConvexHull {
         Point start = prev;
 
         for (; ; ) {
-            float max = -1000;
+            double max = -1000;
             Point maxPoint = null;
             for (Point point : array) {
                 if (!r.contains(point) && (r.size() > 2 || point != start)) {
-                    float v = L.angle(prev, curr, point);
+                    double v = L.angle(prev, curr, point);
                     if (v > max) {
                         max = v;
                         maxPoint = point;
@@ -114,11 +114,11 @@ public class ConvexHull {
         Point start = prev;
 
         for (; ; ) {
-            float max = -1000;
+            double max = -1000;
             Point maxPoint = null;
             for (Point point : graph.get(curr)) {
                 if (!r.contains(point) && (r.size() > 2 || point != start)) {
-                    float v = L.angle(prev, curr, point);
+                    double v = L.angle(prev, curr, point);
                     if (v > max) {
                         max = v;
                         maxPoint = point;

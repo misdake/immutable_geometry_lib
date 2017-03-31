@@ -7,9 +7,9 @@ import com.rs.math.geometry.value.Vector;
 public class Projection {
     public static Point project(Point from, Line to) {
         Vector v = new Vector(to.point, from);
-        float d = Vector.dot(v, to.direction);
-        float dx = d * to.direction.x;
-        float dy = d * to.direction.y;
+        double d = Vector.dot(v, to.direction);
+        double dx = d * to.direction.x;
+        double dy = d * to.direction.y;
         return new Point(to.point.x + dx, to.point.y + dy);
     }
 }

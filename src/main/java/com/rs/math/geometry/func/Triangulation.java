@@ -47,7 +47,7 @@ public class Triangulation {
             Map<Point, Map<Point, Segment>> pointPairToEdge = new HashMap<>();
 
             for (DPoint p : mesh.getPoints()) {
-                Point point = new Point((float) p.getX(), (float) p.getY());
+                Point point = new Point(p.getX(), p.getY());
                 pointMap.put(p, point);
                 points_f.add(point);
                 pointPairToEdge.put(point, new HashMap<Point, Segment>());
@@ -89,8 +89,7 @@ public class Triangulation {
                     Collections.unmodifiableSet(newEdges_f),
                     Collections.unmodifiableSet(triangles_f)
             );
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ignored) {
             return null;
         }
     }
@@ -105,16 +104,16 @@ public class Triangulation {
         Set<Segment> newSegments = new HashSet<>(rr.newEdges);
         for (Iterator<Triangle> iterator = triangles.iterator(); iterator.hasNext(); ) {
             Triangle triangle = iterator.next();
-            float cx = (triangle.a.x + triangle.b.x + triangle.c.x) / 3f;
-            float cy = (triangle.a.y + triangle.b.y + triangle.c.y) / 3f;
+            double cx = (triangle.a.x + triangle.b.x + triangle.c.x) / 3f;
+            double cy = (triangle.a.y + triangle.b.y + triangle.c.y) / 3f;
             if (!Collision.in(new Point(cx, cy), border)) {
                 iterator.remove();
             }
         }
         for (Iterator<Segment> iterator = newSegments.iterator(); iterator.hasNext(); ) {
             Segment segment = iterator.next();
-            float cx = (segment.a.x + segment.b.x) / 2f;
-            float cy = (segment.a.y + segment.b.y) / 2f;
+            double cx = (segment.a.x + segment.b.x) / 2f;
+            double cy = (segment.a.y + segment.b.y) / 2f;
             if (!Collision.in(new Point(cx, cy), border)) {
                 iterator.remove();
             }

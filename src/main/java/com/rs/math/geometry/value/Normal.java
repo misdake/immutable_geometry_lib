@@ -3,7 +3,7 @@ package com.rs.math.geometry.value;
 import com.rs.math.geometry.shape.Point;
 
 public class Normal extends Vector {
-    public Normal(float x, float y) {
+    public Normal(double x, double y) {
         super(x, y, 1);
     }
 

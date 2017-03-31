@@ -43,7 +43,7 @@ public class CollisionTest {
             assertEquals(false, Collision.in(new Segment(p3, p4), g));
         }
         {
-            Polygon g = new Rect(new Point(0, 0), 2.8f, 2.8f, (float) Math.toRadians(45));
+            Polygon g = new Rect(new Point(0, 0), 2.8f, 2.8f, Math.toRadians(45));
             Point p1 = new Point(0.8f, 0.8f);
             Point p2 = new Point(0.9f, 0.9f);
             Point p3 = new Point(1, 1);
@@ -231,21 +231,21 @@ public class CollisionTest {
     public void pointInsidePolygon() {
         {
             Polygon g = new Rect(new Point(0, 0), 2, 2, 0);
-            Point p1 = new Point(0.9f, 0);
-            Point p2 = new Point(1.1f, 0);
+            Point p1 = new Point(0.9, 0);
+            Point p2 = new Point(1.1, 0);
             assertEquals(true, Collision.in(p1, g));
             assertEquals(false, Collision.in(p2, g));
         }
         {
             Polygon g = new Rect(new Point(123, 456), 2, 2, 0);
-            Point p1 = new Point(0.9f + 123, 456);
-            Point p2 = new Point(1.1f + 123, 456);
+            Point p1 = new Point(0.9 + 123, 456);
+            Point p2 = new Point(1.1 + 123, 456);
             assertEquals(true, Collision.in(p1, g));
             assertEquals(false, Collision.in(p2, g));
         }
         {
-            Polygon g = new Rect(new Point(0, 0), 2.8f, 2.8f, (float) Math.toRadians(45));
-            Point p1 = new Point(0.9f, 0.9f);
+            Polygon g = new Rect(new Point(0, 0), 2.8f, 2.8, Math.toRadians(45));
+            Point p1 = new Point(0.9, 0.9);
             Point p2 = new Point(1, 1);
             assertEquals(true, Collision.in(p1, g));
             assertEquals(false, Collision.in(p2, g));

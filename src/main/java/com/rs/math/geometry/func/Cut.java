@@ -122,11 +122,11 @@ public class Cut {
         r.add(curr);
 
         for (; ; ) {
-            float max = -1000;
+            double max = -1000;
             Point maxPoint = null;
             for (Point point : edges.get(curr)) {
                 if (!r.contains(point) && (r.size() >= 2 || point != from)) {
-                    float v = -L.angle(prev, curr, point);
+                    double v = -L.angle(prev, curr, point);
                     if (v > max) {
                         max = v;
                         maxPoint = point;

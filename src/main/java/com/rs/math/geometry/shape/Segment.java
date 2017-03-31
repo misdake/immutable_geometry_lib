@@ -15,7 +15,7 @@ public class Segment {
         return new Line(a, new Normal(a, b));
     }
 
-    public float length() {
+    public double length() {
         return Distance.distance(a, b);
     }
 

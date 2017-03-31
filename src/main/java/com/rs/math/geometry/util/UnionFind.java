@@ -1,8 +1,5 @@
 package com.rs.math.geometry.util;
 
-/*
- * 改进的并查集，支持压缩路径
- */
 public class UnionFind {
 
     public int[] parent;
@@ -13,9 +10,7 @@ public class UnionFind {
             parent[i] = i;
         }
     }
-    /*在查找类别的同时进行路径压缩
-     * 进行路径压缩可以减少查找的时间
-     */
+
     public int find(int e) {
         int root = e;
         while (parent[root] != root) {

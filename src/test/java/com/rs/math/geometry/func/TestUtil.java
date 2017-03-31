@@ -21,9 +21,9 @@ public class TestUtil {
     }
     public static Point nearestPoint(Point p, Collection<Point> points) {
         Point min = null;
-        float minD = Float.MAX_VALUE;
+        double minD = Double.MAX_VALUE;
         for (Point point : points) {
-            float d = Distance.distance(p, point);
+            double d = Distance.distance(p, point);
             if (d < minD) {
                 minD = d;
                 min = point;

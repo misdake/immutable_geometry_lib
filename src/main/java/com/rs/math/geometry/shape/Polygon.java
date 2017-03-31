@@ -15,7 +15,7 @@ public class Polygon {
     public Polygon(Point... points) {
         this(Arrays.asList(points), true);
     }
-    public Polygon(float[] xy) {
+    public Polygon(double[] xy) {
         this(xyToPoints(xy), true);
     }
     Polygon(List<Point> points, boolean owning) {
@@ -36,12 +36,12 @@ public class Polygon {
         return segments;
     }
 
-    private static List<Point> xyToPoints(float[] xy) {
+    private static List<Point> xyToPoints(double[] xy) {
         List<Point> r = new ArrayList<>();
         if (xy == null) {
-            throw new InvalidParameterException("float array is null");
+            throw new InvalidParameterException("double array is null");
         } else if (xy.length % 2 != 0) {
-            throw new InvalidParameterException("float array length is not product of 2");
+            throw new InvalidParameterException("double array length is not product of 2");
         } else {
             for (int i = 0; i < xy.length; i += 2) {
                 r.add(new Point(xy[i], xy[i + 1]));

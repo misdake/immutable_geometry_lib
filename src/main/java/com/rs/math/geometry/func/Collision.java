@@ -61,24 +61,24 @@ public class Collision {
     }
 
     public static boolean test(Circle a, Circle b) {
-        float r = a.radius + b.radius;
+        double r = a.radius + b.radius;
         return Distance.distanceSqr(a.center, b.center) < r * r;
     }
 
     public static boolean test(Line l, Circle c) {
-        float d = Distance.distance(c.center, l);
+        double d = Distance.distance(c.center, l);
         return d < c.radius;
     }
 
     public static boolean testPossible(Segment a, Segment b) {
-        float minax = Math.min(a.a.x, a.b.x) - Constants.EPSILON_STABLE;
-        float minay = Math.min(a.a.y, a.b.y) - Constants.EPSILON_STABLE;
-        float minbx = Math.min(b.a.x, b.b.x) - Constants.EPSILON_STABLE;
-        float minby = Math.min(b.a.y, b.b.y) - Constants.EPSILON_STABLE;
-        float maxax = Math.max(a.a.x, a.b.x) + Constants.EPSILON_STABLE;
-        float maxay = Math.max(a.a.y, a.b.y) + Constants.EPSILON_STABLE;
-        float maxbx = Math.max(b.a.x, b.b.x) + Constants.EPSILON_STABLE;
-        float maxby = Math.max(b.a.y, b.b.y) + Constants.EPSILON_STABLE;
+        double minax = Math.min(a.a.x, a.b.x) - Constants.EPSILON_STABLE;
+        double minay = Math.min(a.a.y, a.b.y) - Constants.EPSILON_STABLE;
+        double minbx = Math.min(b.a.x, b.b.x) - Constants.EPSILON_STABLE;
+        double minby = Math.min(b.a.y, b.b.y) - Constants.EPSILON_STABLE;
+        double maxax = Math.max(a.a.x, a.b.x) + Constants.EPSILON_STABLE;
+        double maxay = Math.max(a.a.y, a.b.y) + Constants.EPSILON_STABLE;
+        double maxbx = Math.max(b.a.x, b.b.x) + Constants.EPSILON_STABLE;
+        double maxby = Math.max(b.a.y, b.b.y) + Constants.EPSILON_STABLE;
         if (maxax < minbx || maxay < minby || maxbx < minax || maxby < minay) return false;
 
         Point a1 = a.a;
@@ -87,12 +87,12 @@ public class Collision {
         Point b2 = b.b;
         Vector va = new Vector(a1, a2);
         Vector vb = new Vector(b1, b2);
-        float la = va.length();
-        float lb = vb.length();
-        float v1 = Vector.cross(va, new Normal(a1, b1)) * Vector.cross(va, new Normal(a1, b2));
-        float v2 = Vector.cross(vb, new Normal(b1, a1)) * Vector.cross(vb, new Normal(b1, a2));
-        boolean ta = Float.isNaN(v1) || v1 <= Constants.EPSILON_STABLE * la * la;
-        boolean tb = Float.isNaN(v2) || v2 <= Constants.EPSILON_STABLE * lb * lb;
+        double la = va.length();
+        double lb = vb.length();
+        double v1 = Vector.cross(va, new Normal(a1, b1)) * Vector.cross(va, new Normal(a1, b2));
+        double v2 = Vector.cross(vb, new Normal(b1, a1)) * Vector.cross(vb, new Normal(b1, a2));
+        boolean ta = Double.isNaN(v1) || v1 <= Constants.EPSILON_STABLE * la * la;
+        boolean tb = Double.isNaN(v2) || v2 <= Constants.EPSILON_STABLE * lb * lb;
         return ta && tb;
     }
 
@@ -146,30 +146,49 @@ public class Collision {
         return true;
     }
 
+    public static boolean in(Point p, Triangle triangle) {
+        Point p0 = triangle.a;
+        Point p1 = triangle.b;
+        Point p2 = triangle.c;
+
+        double s = p0.y * p2.x - p0.x * p2.y + (p2.y - p0.y) * p.x + (p0.x - p2.x) * p.y;
+        double t = p0.x * p1.y - p0.y * p1.x + (p0.y - p1.y) * p.x + (p1.x - p0.x) * p.y;
+
+        if ((s < 0) != (t < 0)) return false;
+
+        double A = -p1.y * p2.x + p0.y * (p2.x - p1.x) + p0.x * (p1.y - p2.y) + p1.x * p2.y;
+        if (A < 0.0) {
+            s = -s;
+            t = -t;
+            A = -A;
+        }
+        return s > 0 && t > 0 && (s + t) <= A;
+    }
+
     // on
 
     public static boolean on(Point p, Segment s) {
-        float maxLength = s.length();
+        double maxLength = s.length();
         Vector v = new Vector(s.a, p);
         Line line = s.getLine();
-        float distance = Distance.distance(p, line);
+        double distance = Distance.distance(p, line);
         if (distance > Constants.EPSILON) return false;
-        float dot = Vector.dot(v, line.direction) / maxLength;
+        double dot = Vector.dot(v, line.direction) / maxLength;
         boolean inSegment = dot <= 1 + Constants.EPSILON_STABLE && dot >= -Constants.EPSILON_STABLE;
         return inSegment;
     }
     private static boolean on_trusted(Point p, Segment s) {
-        float maxLength = s.length();
+        double maxLength = s.length();
         Vector v = new Vector(s.a, p);
         Line line = s.getLine();
-        float dot = Vector.dot(v, line.direction) / maxLength;
+        double dot = Vector.dot(v, line.direction) / maxLength;
         boolean inSegment = dot <= 1 + Constants.EPSILON_STABLE && dot >= -Constants.EPSILON_STABLE;
         return inSegment;
     }
-    private static float on_length(Point p, Segment s) {
+    private static double on_length(Point p, Segment s) {
         Vector v = new Vector(s.a, p);
         Line line = s.getLine();
-        float dot = Vector.dot(v, line.direction);
+        double dot = Vector.dot(v, line.direction);
         return dot;
     }
 
@@ -190,14 +209,14 @@ public class Collision {
         Vector v1 = new Vector(p1, ap1);
         Vector v2 = new Vector(p2, ap2);
 
-        float length = v1.length();
-        float length2 = v2.length();
+        double length = v1.length();
+        double length2 = v2.length();
         if (length <= Constants.EPSILON && length2 <= Constants.EPSILON && Math.abs(v1.length()-v2.length()) < Constants.EPSILON_STABLE) {
             // point a is on line b => SAME
             return new SegmentResult(SAME);
         }
 
-        float direction;
+        double direction;
         if (length > Constants.EPSILON) {
             direction = Vector.dot(v1, a.direction) / length;
             if (Math.abs(direction) < Constants.EPSILON_STABLE) {
@@ -208,9 +227,9 @@ public class Collision {
             direction = Vector.dot(v2, a.direction) / length2;
         }
 
-        float t = length / direction;
-        float x = a.point.x + a.direction.x * t;
-        float y = a.point.y + a.direction.y * t;
+        double t = length / direction;
+        double x = a.point.x + a.direction.x * t;
+        double y = a.point.y + a.direction.y * t;
         return new SegmentResult(INTERSECTED, new Point(x, y));
     }
 
@@ -219,8 +238,8 @@ public class Collision {
         SegmentResult r = intersect(line, b);
         switch (r.resultType) { // SAME || INTERSECTED || NONE
             case INTERSECTED: // test
-                float d1 = Distance.distance(a.a, b);
-                float d2 = Distance.distance(a.b, b);
+                double d1 = Distance.distance(a.a, b);
+                double d2 = Distance.distance(a.b, b);
                 if (Math.abs(d1) < Constants.EPSILON || Math.abs(d2) < Constants.EPSILON) {
                     return new SegmentResult(CONNECTED, r.point);
                 }
@@ -270,13 +289,13 @@ public class Collision {
     }
 
     private static SegmentResult testSameLine(Segment a, Segment b) {
-        float length_aa_b = on_length(a.a, b);
-        float length_ab_b = on_length(a.b, b);
-        float min_a = Math.min(length_aa_b, length_ab_b);
-        float max_a = Math.max(length_aa_b, length_ab_b);
+        double length_aa_b = on_length(a.a, b);
+        double length_ab_b = on_length(a.b, b);
+        double min_a = Math.min(length_aa_b, length_ab_b);
+        double max_a = Math.max(length_aa_b, length_ab_b);
         boolean ab = length_aa_b < length_ab_b;
 
-        float length = b.length();
+        double length = b.length();
         int s1 = status(min_a, 0, length);
         int s2 = status(max_a, 0, length);
 
@@ -337,11 +356,18 @@ public class Collision {
         throw new RuntimeException("unexpected resultType");
     }
 
-    private static int status(float f, float a, float b) {
+    private static int status(double f, double a, double b) {
         if (Math.abs(f - a) < Constants.EPSILON) return -1;
         if (Math.abs(f - b) < Constants.EPSILON) return 1;
         if (f < a) return -2;
         if (f > b) return 2;
         return 0;
+    }
+
+    public static boolean adjacent(Triangle t1, Triangle t2) {
+        boolean b1 = t1.a == t2.a || t1.a == t2.b || t1.a == t2.c;
+        boolean b2 = t1.b == t2.a || t1.b == t2.b || t1.b == t2.c;
+        boolean b3 = t1.c == t2.a || t1.c == t2.b || t1.c == t2.c;
+        return (b1 && b2) || (b1 && b3) || (b2 && b3);
     }
 }

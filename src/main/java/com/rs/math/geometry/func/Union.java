@@ -6,17 +6,7 @@ import com.rs.math.geometry.shape.Point;
 import com.rs.math.geometry.shape.Polygon;
 import com.rs.math.geometry.shape.Segment;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 
 public class Union {
     public static MultiPolygon unionWithoutHoles(Collection<Polygon> polygons) {
@@ -122,16 +112,16 @@ public class Union {
             Segment oriNewSeg = segmentsToAdd.poll();
             newSegments.add(oriNewSeg);
 
-            float minnx = Math.min(oriNewSeg.a.x, oriNewSeg.b.x) - Constants.EPSILON_STABLE;
-            float minny = Math.min(oriNewSeg.a.y, oriNewSeg.b.y) - Constants.EPSILON_STABLE;
-            float maxnx = Math.max(oriNewSeg.a.x, oriNewSeg.b.x) + Constants.EPSILON_STABLE;
-            float maxny = Math.max(oriNewSeg.a.y, oriNewSeg.b.y) + Constants.EPSILON_STABLE;
+            double minnx = Math.min(oriNewSeg.a.x, oriNewSeg.b.x) - Constants.EPSILON_STABLE;
+            double minny = Math.min(oriNewSeg.a.y, oriNewSeg.b.y) - Constants.EPSILON_STABLE;
+            double maxnx = Math.max(oriNewSeg.a.x, oriNewSeg.b.x) + Constants.EPSILON_STABLE;
+            double maxny = Math.max(oriNewSeg.a.y, oriNewSeg.b.y) + Constants.EPSILON_STABLE;
             for (ListIterator<Segment> testIter = currentSegments.listIterator(); testIter.hasNext(); ) {
                 Segment seg = testIter.next();
-                float mintx = Math.min(seg.a.x, seg.b.x) - Constants.EPSILON_STABLE;
-                float minty = Math.min(seg.a.y, seg.b.y) - Constants.EPSILON_STABLE;
-                float maxtx = Math.max(seg.a.x, seg.b.x) + Constants.EPSILON_STABLE;
-                float maxty = Math.max(seg.a.y, seg.b.y) + Constants.EPSILON_STABLE;
+                double mintx = Math.min(seg.a.x, seg.b.x) - Constants.EPSILON_STABLE;
+                double minty = Math.min(seg.a.y, seg.b.y) - Constants.EPSILON_STABLE;
+                double maxtx = Math.max(seg.a.x, seg.b.x) + Constants.EPSILON_STABLE;
+                double maxty = Math.max(seg.a.y, seg.b.y) + Constants.EPSILON_STABLE;
 
                 if (maxnx < mintx || maxny < minty || maxtx < minnx || maxty < minny) continue;
 
