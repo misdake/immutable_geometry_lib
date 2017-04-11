@@ -124,7 +124,10 @@ public class Cut {
         for (; ; ) {
             double max = -1000;
             Point maxPoint = null;
-            for (Point point : edges.get(curr)) {
+            if (curr == null) return null;
+            Set<Point> points = edges.get(curr);
+            if (points == null) return null;
+            for (Point point : points) {
                 if (!r.contains(point) && (r.size() >= 2 || point != from)) {
                     double v = -L.angle(prev, curr, point);
                     if (v > max) {
@@ -224,7 +227,9 @@ public class Cut {
             }
             Graph region = new Graph(edges);
             Polygon border = border(region);
-            l.add(border);
+            if (border != null) {
+                l.add(border);
+            }
             triangles.removeAll(added);
         }
         return new MultiPolygon(l);

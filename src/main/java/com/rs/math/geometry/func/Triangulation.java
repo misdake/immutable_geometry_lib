@@ -97,6 +97,7 @@ public class Triangulation {
 
     public static CdtResult cdt(Graph graph) {
         Polygon border = Cut.border(graph);
+        if (border == null) return null;
         CdtResult rr = cdt(graph.vertices, graph.edges);
         if (rr == null) return null;
 
