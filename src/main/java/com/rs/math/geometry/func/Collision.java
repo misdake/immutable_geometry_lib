@@ -104,7 +104,10 @@ public class Collision {
     // is
 
     public static boolean is(Point p1, Point p2) {
-        return Distance.distance(p1, p2) < Constants.EPSILON;
+//        return Distance.distance(p1, p2) < Constants.EPSILON;
+        return Math.abs(p1.x - p2.x) < Constants.EPSILON &&
+               Math.abs(p1.y - p2.y) < Constants.EPSILON &&
+               Distance.distance(p1, p2) < Constants.EPSILON;
     }
 
     // in
