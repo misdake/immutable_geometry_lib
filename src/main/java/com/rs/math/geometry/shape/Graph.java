@@ -68,4 +68,30 @@ public class Graph {
         }
         return new Graph(Type.PLANAR, this.vertices, this.edges);
     }
+
+    public Graph validate(List<Collision.SegmentResult> intersections) {
+        boolean connected = Cut.connectedGraphs(this).size() == 1;
+        if (!connected) return new Graph(Type.NORMAL, vertices, edges);
+
+        boolean found = false;
+
+        List<Segment> edges = new ArrayList<>(this.edges);
+        for (int i = 0; i < edges.size() - 1; i++) {
+            Segment s1 = edges.get(i);
+            for (int j = i + 1; j < edges.size(); j++) {
+                Segment s2 = edges.get(j);
+                Collision.SegmentResult r = Collision.intersect(s1, s2);
+                if (r.resultType != Collision.SegmentResultType.CONNECTED && r.resultType != Collision.SegmentResultType.NONE) {
+                    found = true;
+                    intersections.add(r);
+                }
+            }
+        }
+
+        if (found) {
+            return new Graph(Type.CONNECTED, this.vertices, this.edges);
+        } else {
+            return new Graph(Type.PLANAR, this.vertices, this.edges);
+        }
+    }
 }
