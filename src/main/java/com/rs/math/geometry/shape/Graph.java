@@ -69,7 +69,7 @@ public class Graph {
         return new Graph(Type.PLANAR, this.vertices, this.edges);
     }
 
-    public Graph validate(List<Collision.SegmentResult> intersections) {
+    public Graph validate(Map<Collision.SegmentResult, Segment[]> intersections) {
         boolean connected = Cut.connectedGraphs(this).size() == 1;
         if (!connected) return new Graph(Type.NORMAL, vertices, edges);
 
@@ -83,7 +83,7 @@ public class Graph {
                 Collision.SegmentResult r = Collision.intersect(s1, s2);
                 if (r.resultType != Collision.SegmentResultType.CONNECTED && r.resultType != Collision.SegmentResultType.NONE) {
                     found = true;
-                    intersections.add(r);
+                    intersections.put(r, new Segment[]{s1, s2});
                 }
             }
         }

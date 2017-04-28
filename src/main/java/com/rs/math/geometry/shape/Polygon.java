@@ -16,7 +16,10 @@ public class Polygon {
         this(Arrays.asList(points), true);
     }
     public Polygon(double[] xy) {
-        this(xyToPoints(xy), true);
+        this(xyxyToPoints(xy), true);
+    }
+    public Polygon(double[] x, double[] y) {
+        this(xxyyToPoints(x, y), true);
     }
     Polygon(List<Point> points, boolean owning) {
         if (!owning) {
@@ -36,7 +39,7 @@ public class Polygon {
         return segments;
     }
 
-    private static List<Point> xyToPoints(double[] xy) {
+    private static List<Point> xyxyToPoints(double[] xy) {
         List<Point> r = new ArrayList<>();
         if (xy == null) {
             throw new InvalidParameterException("double array is null");
@@ -45,6 +48,20 @@ public class Polygon {
         } else {
             for (int i = 0; i < xy.length; i += 2) {
                 r.add(new Point(xy[i], xy[i + 1]));
+            }
+            return r;
+        }
+    }
+
+    private static List<Point> xxyyToPoints(double[] x, double[] y) {
+        List<Point> r = new ArrayList<>();
+        if (x == null || y == null) {
+            throw new InvalidParameterException("double array is null");
+        } else if (x.length != y.length) {
+            throw new InvalidParameterException("array lengths are not equal");
+        } else {
+            for (int i = 0; i < x.length; i++) {
+                r.add(new Point(x[i], y[i]));
             }
             return r;
         }
