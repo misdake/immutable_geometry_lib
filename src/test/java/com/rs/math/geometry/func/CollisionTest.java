@@ -21,6 +21,15 @@ import static org.junit.Assert.*;
 public class CollisionTest {
 
     @Test
+    public void polygonTestPolygon() {
+        {
+            Polygon a = new Rect(new Point(0, 0), 2, 2, 0);
+            Polygon b = new Rect(new Point(2, 0), 2, 2, 0);
+            assertEquals(false, Collision.test(a,b));
+        }
+    }
+
+    @Test
     public void segmentInPolygon() {
         {
             Polygon g = new Rect(new Point(0, 0), 2, 2, 0);

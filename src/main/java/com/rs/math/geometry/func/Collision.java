@@ -101,6 +101,27 @@ public class Collision {
         return r.resultType != NONE;
     }
 
+    public static boolean test(Polygon a, Polygon b) {
+        for (Point point : a.points) {
+            if (on(point, b)) continue;
+            if (in(point, b)) return true;
+        }
+        for (Point point : b.points) {
+            if (on(point, a)) continue;
+            if (in(point, a)) return true;
+        }
+
+        for (Segment s1 : a.segments) {
+            for (Segment s2 : b.segments) {
+                if (intersect(s1, s2).resultType == INTERSECTED) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     // is
 
     public static boolean is(Point p1, Point p2) {
