@@ -119,6 +119,7 @@ public class Cut {
             }
         }
         List<Point> r = new ArrayList<>();
+        List<Point> bad = new ArrayList<>();
         r.add(curr);
 
         for (; ; ) {
@@ -128,7 +129,7 @@ public class Cut {
             Set<Point> points = edges.get(curr);
             if (points == null) return null;
             for (Point point : points) {
-                if (!r.contains(point) && (r.size() >= 2 || point != from)) {
+                if (!bad.contains(point) && !r.contains(point) && (r.size() >= 2 || point != from)) {
                     double v = -L.angle(prev, curr, point);
                     if (v > max) {
                         max = v;
@@ -136,10 +137,22 @@ public class Cut {
                     }
                 }
             }
-            if (maxPoint == from) break;
-            r.add(maxPoint);
-            prev = curr;
-            curr = maxPoint;
+            if (maxPoint == null) {
+                r.remove(curr);
+                bad.add(curr);
+                if (r.size() > 1) {
+                    prev = r.get(r.size() - 2);
+                    curr = r.get(r.size() - 1);
+                } else {
+                    prev = from;
+                    curr = r.get(r.size() - 1);
+                }
+            } else {
+                if (maxPoint == from) break;
+                r.add(maxPoint);
+                prev = curr;
+                curr = maxPoint;
+            }
         }
         r.add(from);
 
