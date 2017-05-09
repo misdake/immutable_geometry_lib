@@ -113,8 +113,12 @@ public class Collision {
 
         for (Segment s1 : a.segments) {
             for (Segment s2 : b.segments) {
-                if (intersect(s1, s2).resultType == INTERSECTED) {
-                    return true;
+                SegmentResult r = intersect(s1, s2);
+                if (r.resultType == INTERSECTED) {
+                    boolean cut = is(r.point, s1.a) || is(r.point, s1.b) || is(r.point, s2.a) || is(r.point, s2.b);
+                    if (!cut) {
+                        return true;
+                    }
                 }
             }
         }
