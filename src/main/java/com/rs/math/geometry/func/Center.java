@@ -43,6 +43,10 @@ public class Center {
         double cellSize = Math.min(width, height);
         double h = cellSize / 2;
 
+        if (cellSize == 0) {
+            return new Point(minX, minY);
+        }
+
         PriorityQueue<Cell> cellQueue = new PriorityQueue<>();
         for (double x = minX; x < maxX; x += cellSize) {
 
@@ -55,7 +59,7 @@ public class Center {
         Cell bboxCell = new Cell(minX + width / 2, minY + height / 2, 0, polygon);
         if (bboxCell.d > bestCell.d) bestCell = bboxCell;
 
-        int numProbes = cellQueue.size();
+//        int numProbes = cellQueue.size();
 
         while (cellQueue.size() > 0) {
             Cell cell = cellQueue.poll();
@@ -72,7 +76,7 @@ public class Center {
             cellQueue.add(new Cell(cell.x + h, cell.y - h, h, polygon));
             cellQueue.add(new Cell(cell.x - h, cell.y + h, h, polygon));
             cellQueue.add(new Cell(cell.x + h, cell.y + h, h, polygon));
-            numProbes += 4;
+//            numProbes += 4;
         }
 
 //        System.out.println("num probes: " + numProbes);
