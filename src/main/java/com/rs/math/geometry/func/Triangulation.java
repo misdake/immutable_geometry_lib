@@ -35,7 +35,7 @@ public class Triangulation {
                 DEdge e = new DEdge(line.a.x, line.a.y, 0, line.b.x, line.b.y, 0);
                 mesh.addConstraintEdge(e);
             }
-//            mesh.forceConstraintIntegrity();
+            mesh.forceConstraintIntegrity();
             mesh.processDelaunay();
 
             Map<DPoint, Point> pointMap = new HashMap<>();
