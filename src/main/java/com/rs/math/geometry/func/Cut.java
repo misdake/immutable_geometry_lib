@@ -9,44 +9,30 @@ public class Cut {
 
     public static void main(String[] args) {
         Point[] p = new Point[]{
-                new Point(200.0f, 143.0f),
-                new Point(296.0f, 141.0f),
-                new Point(215.0f, 233.0f),
-                new Point(305.0f, 231.0f),
+                new Point(0,0),
+                new Point(0,1),
+                new Point(1,1),
+                new Point(1,0),
+                new Point(2,0),
+                new Point(2,1),
+                new Point(3,1),
+                new Point(3,0),
         };
         Segment[] e = new Segment[]{
-                new Segment(p[1], p[3]),
-                new Segment(p[0], p[2]),
                 new Segment(p[0], p[1]),
                 new Segment(p[1], p[2]),
                 new Segment(p[2], p[3]),
+                new Segment(p[3], p[0]),
+
+                new Segment(p[4], p[5]),
+                new Segment(p[5], p[6]),
+                new Segment(p[6], p[7]),
+                new Segment(p[7], p[4]),
+
+                new Segment(p[2], p[5]),
         };
-        Graph graph = new Graph(Arrays.asList(e)).validate();
-        for (int i = 0; i != 10000; i++) {
-            Point[] px = new Point[]{
-                    new Point(0, 0),
-                    new Point(1, 0),
-                    new Point(2, 0),
-                    new Point(0, 1),
-                    new Point(1, 1),
-                    new Point(0, 2),
-                    new Point(2, 2),
-            };
-            Segment[] ex = new Segment[]{
-                    new Segment(px[0], px[1]),
-                    new Segment(px[1], px[2]),
-                    new Segment(px[2], px[6]),
-                    new Segment(px[6], px[5]),
-                    new Segment(px[5], px[3]),
-                    new Segment(px[3], px[0]),
-                    new Segment(px[3], px[4]),
-                    new Segment(px[4], px[1]),
-                    new Segment(px[4], px[6]),
-            };
-            Graph graphx = new Graph(Arrays.asList(ex)).validate();
-            MultiPolygon r = cutPlaneByPlanarGraph(graphx);
-        }
-//        System.out.println(r);
+        MultiPolygon r = cutPlaneByPlanarGraph(new Graph(Arrays.asList(e)));
+        System.out.println(r.polygons.size());
     }
 
     public static Set<Graph> connectedGraphs(Graph graph) {
@@ -129,7 +115,7 @@ public class Cut {
             Set<Point> points = edges.get(curr);
             if (points == null) return null;
             for (Point point : points) {
-                if (!bad.contains(point) && !r.contains(point) && (r.size() >= 2 || point != from)) {
+                if (!bad.contains(point) /*&& !r.contains(point)*/ && (r.size() >= 2 || point != from)) {
                     double v = -L.angle(prev, curr, point);
                     if (v > max) {
                         max = v;
