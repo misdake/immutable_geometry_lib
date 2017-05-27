@@ -47,9 +47,9 @@ public class Collision {
             this.point = null;
             indices = r;
         }
-        public SegmentResult(SegmentResultType resultType, int aa, int ab, int ba, int bb) {
+        public SegmentResult(SegmentResultType resultType, Point point, int aa, int ab, int ba, int bb) {
             this.resultType = resultType;
-            this.point = null;
+            this.point = point;
             indices = new int[]{aa, ab, ba, bb};
         }
     }
@@ -296,10 +296,10 @@ public class Collision {
                 boolean is_ab_bb = is(a.b, b.b);
                 boolean is_aa_bb = is(a.a, b.b);
                 boolean is_ab_ba = is(a.b, b.a);
-                if (is_aa_ba) return new SegmentResult(CONNECTED, 1, 0, 1, 2);
-                if (is_ab_bb) return new SegmentResult(CONNECTED, 0, 1, 2, 1);
-                if (is_aa_bb) return new SegmentResult(CONNECTED, 1, 0, 2, 1);
-                if (is_ab_ba) return new SegmentResult(CONNECTED, 0, 1, 1, 2);
+                if (is_aa_ba) return new SegmentResult(CONNECTED, a.a, 1, 0, 1, 2);
+                if (is_ab_bb) return new SegmentResult(CONNECTED, a.b, 0, 1, 2, 1);
+                if (is_aa_bb) return new SegmentResult(CONNECTED, a.a, 1, 0, 2, 1);
+                if (is_ab_ba) return new SegmentResult(CONNECTED, a.b, 0, 1, 1, 2);
 
                 //test point
                 boolean inA = on_trusted(r.point, a);

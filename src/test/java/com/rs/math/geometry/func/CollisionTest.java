@@ -1,21 +1,9 @@
 package com.rs.math.geometry.func;
 
-import com.rs.math.geometry.shape.Line;
-import com.rs.math.geometry.shape.Point;
-import com.rs.math.geometry.shape.Polygon;
-import com.rs.math.geometry.shape.Rect;
-import com.rs.math.geometry.shape.Segment;
+import com.rs.math.geometry.shape.*;
 import org.junit.Test;
 
-import static com.rs.math.geometry.func.Collision.SegmentResultType.CONNECTED;
-import static com.rs.math.geometry.func.Collision.SegmentResultType.IN;
-import static com.rs.math.geometry.func.Collision.SegmentResultType.INTERSECTED;
-import static com.rs.math.geometry.func.Collision.SegmentResultType.IN_CONNECTED;
-import static com.rs.math.geometry.func.Collision.SegmentResultType.NONE;
-import static com.rs.math.geometry.func.Collision.SegmentResultType.OUT;
-import static com.rs.math.geometry.func.Collision.SegmentResultType.OUT_CONNECTED;
-import static com.rs.math.geometry.func.Collision.SegmentResultType.SAME;
-import static com.rs.math.geometry.func.Collision.SegmentResultType.INTERLEAVED;
+import static com.rs.math.geometry.func.Collision.SegmentResultType.*;
 import static org.junit.Assert.*;
 
 public class CollisionTest {
@@ -232,7 +220,7 @@ public class CollisionTest {
             Segment l2 = new Segment(new Point(1, 1), new Point(2, 0));
             Collision.SegmentResult r = Collision.intersect(l1, l2);
             assertEquals(CONNECTED, r.resultType);
-            assertEquals(null, r.point);
+            assertTrue(Collision.is(r.point, new Point(1, 1)));
         }
     }
 
