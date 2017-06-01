@@ -81,7 +81,7 @@ public class ConvexHull {
             double max = -1000;
             Point maxPoint = null;
             for (Point point : array) {
-                if (!r.contains(point) && (r.size() > 2 || point != start)) {
+                if (!r.contains(point) && (r.size() >= 2 || point != start)) {
                     double v = L.angle(prev, curr, point);
                     if (v > max) {
                         max = v;
@@ -117,7 +117,7 @@ public class ConvexHull {
             double max = -1000;
             Point maxPoint = null;
             for (Point point : graph.get(curr)) {
-                if (!r.contains(point) && (r.size() > 2 || point != start)) {
+                if (!r.contains(point) && (r.size() >= 2 || point != start)) {
                     double v = L.angle(prev, curr, point);
                     if (v > max) {
                         max = v;

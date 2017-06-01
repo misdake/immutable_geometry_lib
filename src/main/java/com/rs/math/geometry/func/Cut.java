@@ -7,34 +7,6 @@ import java.util.*;
 
 public class Cut {
 
-    public static void main(String[] args) {
-        Point[] p = new Point[]{
-                new Point(0,0),
-                new Point(0,1),
-                new Point(1,1),
-                new Point(1,0),
-                new Point(2,0),
-                new Point(2,1),
-                new Point(3,1),
-                new Point(3,0),
-        };
-        Segment[] e = new Segment[]{
-                new Segment(p[0], p[1]),
-                new Segment(p[1], p[2]),
-                new Segment(p[2], p[3]),
-                new Segment(p[3], p[0]),
-
-                new Segment(p[4], p[5]),
-                new Segment(p[5], p[6]),
-                new Segment(p[6], p[7]),
-                new Segment(p[7], p[4]),
-
-                new Segment(p[2], p[5]),
-        };
-        MultiPolygon r = cutPlaneByPlanarGraph(new Graph(Arrays.asList(e)));
-        System.out.println(r.polygons.size());
-    }
-
     public static Set<Graph> connectedGraphs(Graph graph) {
         List<Point> vertices = new ArrayList<>(graph.vertices);
         Map<Point, Integer> indices = new HashMap<>();
@@ -115,7 +87,7 @@ public class Cut {
             Set<Point> points = edges.get(curr);
             if (points == null) return null;
             for (Point point : points) {
-                if (!bad.contains(point) /*&& !r.contains(point)*/ && (r.size() >= 2 || point != from)) {
+                if (!bad.contains(point) && !r.contains(point) && (r.size() >= 2 || point != from)) {
                     double v = -L.angle(prev, curr, point);
                     if (v > max) {
                         max = v;
@@ -233,4 +205,5 @@ public class Cut {
         }
         return new MultiPolygon(l);
     }
+
 }

@@ -74,7 +74,7 @@ public class Union {
         return new MultiPolygon(r);
     }
 
-    private static Polygon refine(Polygon input) {
+    public static Polygon refine(Polygon input) {
         List<Point> points = input.points;
         List<Point> r = new ArrayList<>(points);
         int size = points.size();
