@@ -5,11 +5,15 @@ import com.rs.math.geometry.shape.MultiPolygon;
 import com.rs.math.geometry.shape.Point;
 import com.rs.math.geometry.shape.Polygon;
 import com.rs.math.geometry.shape.Segment;
+import com.rs.math.geometry.util.AABB;
+import com.rs.math.geometry.util.QuadTree;
+import com.rs.math.geometry.util.QuadTree2;
 
 import java.util.*;
 
 public class Union {
     public static MultiPolygon unionWithoutHoles(Collection<Polygon> polygons) {
+        AABB aabb = new AABB();
         //add segments to allSegments
         List<Segment> allSegments = new ArrayList<>();
         for (Polygon polygon : polygons) {
@@ -17,6 +21,8 @@ public class Union {
                 if (segment.length() > 2 * Constants.EPSILON) {
                     allSegments.add(segment);
                 }
+                aabb.combine(segment.a.x, segment.a.y);
+                aabb.combine(segment.b.x, segment.b.y);
             }
         }
 
@@ -24,7 +30,7 @@ public class Union {
         Set<Segment> segments = unionSegments(allSegments);
 
         //reconstruct graph
-        Set<Point> allPoints = new HashSet<>();
+        QuadTree<Point> allPoints = new QuadTree<>(aabb.getMinX(), aabb.getMaxX(), aabb.getMinY(), aabb.getMaxY());
         final Map<Point, List<Point>> graph = new HashMap<>();
         for (Segment segment : segments) {
             Point a = getCachedPoint(allPoints, segment.a);
@@ -89,24 +95,43 @@ public class Union {
         return new Polygon(r);
     }
 
-    public static Set<Segment> unionSegments(Collection<Segment> allSegments) {
-        //prepare segments
-        Set<Point> allPoints = new HashSet<>();
-        Map<Point, Point> pointMap = new HashMap<>();
-        //add points to allPoints
-        for (Segment segment : allSegments) {
-            Point a = getCachedPoint(allPoints, segment.a);
-            Point b = getCachedPoint(allPoints, segment.b);
-            pointMap.put(segment.a, a);
-            pointMap.put(segment.b, b);
+    private static class SegmentRegion extends AABB {
+        public final Segment segment;
+        public SegmentRegion(Segment segment) {
+            this.segment = segment;
+            this.combine(segment.a.x, segment.a.y);
+            this.combine(segment.b.x, segment.b.y);
         }
-        //add segments to allSegments
-        Queue<Segment> segmentsToAdd = new ArrayDeque<>();
+    }
+
+    public static Set<Segment> unionSegments(Collection<Segment> allSegments) {
+        AABB aabb = new AABB();
         for (Segment segment : allSegments) {
-            segmentsToAdd.add(new Segment(pointMap.get(segment.a), pointMap.get(segment.b)));
+            aabb.combine(segment.a.x, segment.a.y);
+            aabb.combine(segment.b.x, segment.b.y);
+        }
+        //prepare segments
+        QuadTree<Point> allPoints = new QuadTree<>(aabb.getMinX(), aabb.getMaxX(), aabb.getMinY(), aabb.getMaxY());
+
+        Queue<Segment> segmentsToAdd = new ArrayDeque<>();
+        {
+            Map<Point, Point> pointMap = new HashMap<>();
+            //add points to allPoints
+            for (Segment segment : allSegments) {
+                Point a = getCachedPoint(allPoints, segment.a);
+                Point b = getCachedPoint(allPoints, segment.b);
+                pointMap.put(segment.a, a);
+                pointMap.put(segment.b, b);
+            }
+            //add segments to allSegments
+            for (Segment segment : allSegments) {
+                segmentsToAdd.add(new Segment(pointMap.get(segment.a), pointMap.get(segment.b)));
+            }
         }
 
-        LinkedList<Segment> currentSegments = new LinkedList<>();
+        QuadTree2<SegmentRegion> regions = new QuadTree2<>(aabb.getMinX(), aabb.getMaxX(), aabb.getMinY(), aabb.getMaxY());
+
+        Set<Segment> addedSegments = new HashSet<>();
         while (!segmentsToAdd.isEmpty()) {
             List<Segment> newSegments = new ArrayList<>();
             Segment oriNewSeg = segmentsToAdd.poll();
@@ -116,14 +141,28 @@ public class Union {
             double minny = Math.min(oriNewSeg.a.y, oriNewSeg.b.y) - Constants.EPSILON_STABLE;
             double maxnx = Math.max(oriNewSeg.a.x, oriNewSeg.b.x) + Constants.EPSILON_STABLE;
             double maxny = Math.max(oriNewSeg.a.y, oriNewSeg.b.y) + Constants.EPSILON_STABLE;
-            for (ListIterator<Segment> testIter = currentSegments.listIterator(); testIter.hasNext(); ) {
-                Segment seg = testIter.next();
+
+            //gather possible segments to test
+            ArrayList<SegmentRegion> found = regions.find(minnx, maxnx, minny, maxny);
+            Set<Segment> possibleSegments = new HashSet<>();
+            for (SegmentRegion region : found) {
+                Segment seg = region.segment;
+                if (!addedSegments.contains(seg)) continue;
                 double mintx = Math.min(seg.a.x, seg.b.x) - Constants.EPSILON_STABLE;
                 double minty = Math.min(seg.a.y, seg.b.y) - Constants.EPSILON_STABLE;
                 double maxtx = Math.max(seg.a.x, seg.b.x) + Constants.EPSILON_STABLE;
                 double maxty = Math.max(seg.a.y, seg.b.y) + Constants.EPSILON_STABLE;
-
                 if (maxnx < mintx || maxny < minty || maxtx < minnx || maxty < minny) continue;
+                possibleSegments.add(seg);
+                //remove from current added
+                addedSegments.remove(seg);
+                regions.remove(region);
+            }
+
+            //test new segment with possible segments
+            LinkedList<Segment> currentSegments = new LinkedList<>(possibleSegments);
+            for (ListIterator<Segment> testIter = currentSegments.listIterator(); testIter.hasNext(); ) {
+                Segment seg = testIter.next();
 
                 for (int i = 0; i < newSegments.size(); i++) {
                     Segment newSegment = newSegments.get(i);
@@ -260,6 +299,10 @@ public class Union {
                                 newSegments.set(i, new Segment(b2, a2));
                             } else if (Collision.is(a2, b2)) {
                                 newSegments.set(i, new Segment(a1, b1));
+                            } else if (Distance.distance(a1, b1) < Constants.EPSILON * 2) {
+                                newSegments.set(i, new Segment(b2, a2));
+                            } else if (Distance.distance(a2, b2) < Constants.EPSILON * 2) {
+                                newSegments.set(i, new Segment(a1, b1));
                             } else {
                                 throw new RuntimeException();
                             }
@@ -279,24 +322,21 @@ public class Union {
                     }
                 }
             } //new segment tested
-            currentSegments.addAll(newSegments);
+
+            addedSegments.addAll(newSegments);
+            addedSegments.addAll(currentSegments);
+            for (Segment segment : newSegments) regions.insert(new SegmentRegion(segment));
+            for (Segment segment : currentSegments) regions.insert(new SegmentRegion(segment));
         }
 
-        return new HashSet<>(currentSegments);
+        return new HashSet<>(addedSegments);
     }
 
-    private static Point getCachedPoint(Set<Point> allPoints, Point a) {
-        if (allPoints.contains(a)) return a;
-
-        Point to = a;
-        for (Point b : allPoints) {
-            if (Collision.is(a, b)) {
-                to = b;
-                break;
-            }
-        }
-        allPoints.add(to);
-        return to;
+    private static Point getCachedPoint(QuadTree<Point> allPoints, Point a) {
+        Point p = allPoints.nearest(a, Constants.EPSILON);
+        if (p != null) return p;
+        allPoints.insert(a);
+        return a;
     }
 
     private static <T> void addMultiMap(Map<T, List<T>> graph, T key, T value) {

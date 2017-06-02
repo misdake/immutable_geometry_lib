@@ -19,8 +19,8 @@ public class AABB {
     public static final double max = Double.MAX_VALUE;
     public static final double min = -Double.MAX_VALUE;
 
-    private double minX, minY;
-    private double maxX, maxY;
+    double minX, minY;
+    double maxX, maxY;
 
     public AABB() {
         reset();
@@ -56,6 +56,10 @@ public class AABB {
     public boolean intersect(AABB other) {
         return !(this.maxX < other.minX || this.minX > other.maxX ||
                  this.maxY < other.minY || this.minY > other.maxY);
+    }
+    public boolean intersect(double minX, double maxX, double minY, double maxY) {
+        return !(this.maxX < minX || this.minX > maxX ||
+                 this.maxY < minY || this.minY > maxY);
     }
 
     public double getMinX() { return minX; }
