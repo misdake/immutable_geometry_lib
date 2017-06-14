@@ -40,6 +40,11 @@ public class QuadTree<T extends Point> {
         root.find(list, minX, maxX, minY, maxY);
         return list;
     }
+    public ArrayList<T> find(AABB aabb) {
+        ArrayList<T> list = new ArrayList<>();
+        root.find(list, aabb.minX, aabb.maxX, aabb.minY, aabb.maxY);
+        return list;
+    }
     public T nearest(double x, double y, double max) {
         ArrayList<T> list = find(x - max, x + max, y - max, y + max);
         T p = null;

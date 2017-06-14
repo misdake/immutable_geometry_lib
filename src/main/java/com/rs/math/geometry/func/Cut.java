@@ -87,7 +87,7 @@ public class Cut {
             Set<Point> points = edges.get(curr);
             if (points == null) return null;
             for (Point point : points) {
-                if (!bad.contains(point) && !r.contains(point) && (r.size() >= 2 || point != from)) {
+                if (!bad.contains(point) /*&& !r.contains(point)*/ && (r.size() >= 2 || point != from)) {
                     double v = -L.angle(prev, curr, point);
                     if (v > max) {
                         max = v;

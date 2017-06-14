@@ -22,6 +22,11 @@ public class QuadTree2<T extends AABB> {
         root.trim();
     }
 
+    public ArrayList<T> find(AABB aabb) {
+        ArrayList<T> list = new ArrayList<>();
+        root.find(list, aabb.minX, aabb.maxX, aabb.minY, aabb.maxY);
+        return list;
+    }
     public ArrayList<T> find(double minX, double maxX, double minY, double maxY) {
         ArrayList<T> list = new ArrayList<>();
         root.find(list, minX, maxX, minY, maxY);
