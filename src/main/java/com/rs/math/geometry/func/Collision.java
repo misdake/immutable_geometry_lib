@@ -141,6 +141,10 @@ public class Collision {
         return Distance.distance(p, circle.center) < circle.radius;
     }
 
+    public static boolean out(Point p, Circle circle) {
+        return Distance.distance(p, circle.center) > circle.radius;
+    }
+
     public static boolean in(Point p, Polygon polygon) {
         boolean c = false;
 

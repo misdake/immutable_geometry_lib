@@ -11,7 +11,7 @@ public class Cover {
         Circle circle = minCircle(Arrays.asList(
                 new Point(0, 1),
                 new Point(0, 0),
-                new Point(2, 0)
+                new Point(0, 0)
         ));
         System.out.printf("(%s,%s) %s\n", circle.center.x, circle.center.y, circle.radius);
     }
@@ -25,12 +25,12 @@ public class Cover {
         int n = list.size();
         for (int i = 0; i < n; i++) {
             Point pi = list.get(i);
-            if (!Collision.in(pi, r)) {
+            if (Collision.out(pi, r)) {
                 r = new Circle(new Point(pi.x, pi.y), 0);
 
                 for (int j = 0; j < i; j++) {
                     Point pj = list.get(j);
-                    if (!Collision.in(pj, r)) {
+                    if (Collision.out(pj, r)) {
                         double x = (pi.x + pj.x) / 2;
                         double y = (pi.y + pj.y) / 2;
                         double radius = Distance.distance(pi, pj) / 2;
@@ -38,7 +38,7 @@ public class Cover {
 
                         for (int k = 0; k < j; k++) {
                             Point pk = list.get(k);
-                            if (!Collision.in(pk, r)) {
+                            if (Collision.out(pk, r)) {
                                 Point center = solve(
                                         pi.x - pj.x, pi.y - pj.y, ((pj.x * pj.x + pj.y * pj.y) - (pi.x * pi.x + pi.y * pi.y)) / 2,
                                         pi.x - pk.x, pi.y - pk.y, ((pk.x * pk.x + pk.y * pk.y) - (pi.x * pi.x + pi.y * pi.y)) / 2
