@@ -113,11 +113,16 @@ public class ConvexHull {
         r.add(curr);
         Point start = prev;
 
+        List<Point> bad = new ArrayList<>();
+
         for (; ; ) {
             double max = -1000;
             Point maxPoint = null;
-            for (Point point : graph.get(curr)) {
-                if (!r.contains(point) && (r.size() >= 2 || point != start)) {
+            if (curr == null) return null;
+            List<Point> nextSet = graph.get(curr);
+            if (nextSet == null) return null;
+            for (Point point : nextSet) {
+                if (!bad.contains(point) && !r.contains(point) && point != prev && (r.size() >= 2 || point != start)) {
                     double v = L.angle(prev, curr, point);
                     if (v > max) {
                         max = v;
@@ -125,10 +130,22 @@ public class ConvexHull {
                     }
                 }
             }
-            if (maxPoint == start) break;
-            r.add(maxPoint);
-            prev = curr;
-            curr = maxPoint;
+            if (maxPoint == null) {
+                r.remove(curr);
+                bad.add(curr);
+                if (r.size() > 1) {
+                    prev = r.get(r.size() - 2);
+                    curr = r.get(r.size() - 1);
+                } else {
+                    prev = start;
+                    curr = r.get(r.size() - 1);
+                }
+            } else {
+                if (maxPoint == start) break;
+                r.add(maxPoint);
+                prev = curr;
+                curr = maxPoint;
+            }
         }
 
         r.add(start);

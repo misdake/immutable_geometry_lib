@@ -35,6 +35,10 @@ public class Union {
         for (Segment segment : segments) {
             Point a = getCachedPoint(allPoints, segment.a);
             Point b = getCachedPoint(allPoints, segment.b);
+        }
+        for (Segment segment : segments) {
+            Point a = getCachedPoint(allPoints, segment.a);
+            Point b = getCachedPoint(allPoints, segment.b);
             addMultiMap(graph, a, b);
             addMultiMap(graph, b, a);
         }
@@ -333,7 +337,7 @@ public class Union {
     }
 
     private static Point getCachedPoint(QuadTree<Point> allPoints, Point a) {
-        Point p = allPoints.nearest(a, Constants.EPSILON);
+        Point p = allPoints.nearest(a, Constants.EPSILON * 2);
         if (p != null) return p;
         allPoints.insert(a);
         return a;
