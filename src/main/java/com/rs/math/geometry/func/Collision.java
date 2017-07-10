@@ -289,44 +289,43 @@ public class Collision {
         throw new RuntimeException("unexpected resultType");
     }
 
-//    private static SegmentResult intersect(Point a1, Point a2, Point b1, Point b2) {
-//        double x1 = a1.x, x2 = a2.x, x3 = b1.x, x4 = b2.x;
-//        double y1 = a1.y, y2 = a2.y, y3 = b1.y, y4 = b2.y;
-//
-//        double dx1 = x1 - x2;
-//        double dx2 = x3 - x4;
-//        double dy2 = y3 - y4;
-//        double dy1 = y1 - y2;
-//
-//        double dd = dx1 * dy2 - dy1 * dx2;
-//        if (Math.abs(dd) < Constants.EPSILON) { //parallel or same
-//            boolean on = Distance.distance(a1, new Line(b1, b2)) < Constants.EPSILON;
-//            if (on) {
-//                return new SegmentResult(SAME);
-//            } else {
-//                return new SegmentResult(NONE);
-//            }
-//        } else {
-//            double xdd = (x1 * y2 - y1 * x2) * dx2 - dx1 * (x3 * y4 - y3 * x4);
-//            double ydd = (x1 * y2 - y1 * x2) * dy2 - dy1 * (x3 * y4 - y3 * x4);
-//            double x = xdd / dd;
-//            double y = ydd / dd;
-//            SegmentResult r = new SegmentResult(INTERSECTED, new Point(x, y));
-//            return r;
-//        }
-//
-//    }
+    private static SegmentResult intersect(Point a1, Point a2, Point b1, Point b2) {
+        double x1 = a1.x, x2 = a2.x, x3 = b1.x, x4 = b2.x;
+        double y1 = a1.y, y2 = a2.y, y3 = b1.y, y4 = b2.y;
+
+        double dx1 = x1 - x2;
+        double dx2 = x3 - x4;
+        double dy2 = y3 - y4;
+        double dy1 = y1 - y2;
+
+        double dd = dx1 * dy2 - dy1 * dx2;
+        if (Math.abs(dd) < Constants.EPSILON) { //parallel or same
+            boolean on = Distance.distance(a1, new Line(b1, b2)) < Constants.EPSILON;
+            if (on) {
+                return new SegmentResult(SAME);
+            } else {
+                return new SegmentResult(NONE);
+            }
+        } else {
+            double xdd = (x1 * y2 - y1 * x2) * dx2 - dx1 * (x3 * y4 - y3 * x4);
+            double ydd = (x1 * y2 - y1 * x2) * dy2 - dy1 * (x3 * y4 - y3 * x4);
+            double x = xdd / dd;
+            double y = ydd / dd;
+            SegmentResult r = new SegmentResult(INTERSECTED, new Point(x, y));
+            return r;
+        }
+    }
 
     public static SegmentResult intersect(Segment a, Segment b) { // SAME || INSIDE || OUTSIDE || INTERLEAVED || CONNECTED || INTERSECTED || NONE
         if (!testPossible(a, b)) {
             return new SegmentResult(NONE);
         }
 
-//        SegmentResult r = intersect(a.a, a.b, b.a, b.b);
+        SegmentResult r = intersect(a.a, a.b, b.a, b.b);
 
-        Line la = a.getLine();
-        Line lb = b.getLine();
-        SegmentResult r = intersect(la, lb);
+//        Line la = a.getLine();
+//        Line lb = b.getLine();
+//        SegmentResult r = intersect(la, lb);
 
         switch (r.resultType) {
             case INTERSECTED: {
