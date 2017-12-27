@@ -18,6 +18,11 @@ public class Graph {
     public final Set<Point>   vertices;
     public final Set<Segment> edges;
 
+    public Graph(List<Point> points, Collection<Segment> edges) {
+        this.type = Type.UNKNOWN;
+        vertices = Collections.unmodifiableSet(new LinkedHashSet<>(points));
+        this.edges = Collections.unmodifiableSet(new HashSet<>(edges));
+    }
     public Graph(Collection<Segment> edges) {
         Set<Point> v = new HashSet<>();
         Set<Segment> e = new HashSet<>();

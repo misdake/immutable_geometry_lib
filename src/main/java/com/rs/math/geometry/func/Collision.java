@@ -298,8 +298,10 @@ public class Collision {
         double dy2 = y3 - y4;
         double dy1 = y1 - y2;
 
+        double d = Math.hypot(dx1, dy1) + Math.hypot(dx2, dy2);
+
         double dd = dx1 * dy2 - dy1 * dx2;
-        if (Math.abs(dd) < Constants.EPSILON) { //parallel or same
+        if (Math.abs(dd) < Constants.EPSILON * d) { //parallel or same
             boolean on = Distance.distance(a1, new Line(b1, b2)) < Constants.EPSILON;
             if (on) {
                 return new SegmentResult(SAME);

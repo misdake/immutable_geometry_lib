@@ -1,40 +1,11 @@
 package com.rs.math.geometry.func;
 
-import com.rs.math.geometry.Constants;
 import com.rs.math.geometry.shape.Point;
 import com.rs.math.geometry.shape.Polygon;
 
 import java.util.*;
 
 public class ConvexHull {
-    public static Polygon convexHull_JarvisMarch(Collection<Point> points) {
-        Point[] array = points.toArray(new Point[points.size()]);
-
-        int start = 0;
-        for (int i = 1; i < array.length; i++) {
-            if (L.compare(array[start], array[i]) < 0) {
-                start = i;
-            }
-        }
-
-        List<Point> r = new ArrayList<>();
-        r.add(array[start]);
-
-        for (int m = 1; true; ++m) {
-            int next = start;
-            for (int i = 0; i < array.length; i++) {
-                Point point = array[i];
-                double c = L.crossDirection(r.get(m - 1), point, array[next]);
-                if (c > Constants.EPSILON || Math.abs(c) < Constants.EPSILON && L.far(r.get(m - 1), point, array[next])) {
-                    next = i;
-                }
-            }
-            if (next == start) break;
-            r.add(array[next]);
-        }
-
-        return new Polygon(array);
-    }
 
     public static Polygon convexHull_AndrewMonotoneChain(Collection<Point> points) {
         Point[] P = points.toArray(new Point[0]);
@@ -98,28 +69,62 @@ public class ConvexHull {
         r.add(start);
         return new Polygon(r);
     }
-    public static Polygon convexHull_misdake(Collection<Point> points, Map<Point, List<Point>> graph) {
+    public static Polygon convexHull_misdake(Collection<Point> points, Map<Point, ? extends Collection<Point>> graph) {
+        Queue<Point> queue = new ArrayDeque<>();
+        for (Map.Entry<Point, ? extends Collection<Point>> e : graph.entrySet()) {
+            if (e.getValue().size() == 1) {
+                queue.add(e.getKey());
+            }
+        }
+        while (!queue.isEmpty()) {
+            Point point = queue.poll();
+            points.remove(point);
+
+            Collection<Point> to = graph.get(point);
+            graph.remove(point);
+            for (Point t : to) {
+                if (points.contains(t)) {
+                    Collection<Point> to2 = graph.get(t);
+                    to2.remove(point);
+                    if (to2.size() == 1) {
+                        queue.add(t);
+                    }
+                }
+            }
+        }
+        if (points.size() == 0) return null;
+
         Point[] array = points.toArray(new Point[points.size()]);
         Arrays.sort(array, L.POINT_COMPARATOR_LEFT_BOTTOM);
 
         List<Point> r = new ArrayList<>();
         Point prev = array[0];
-        Point curr = array[1];
-        if (prev.y < curr.y) {
-            Point t = prev;
-            prev = curr;
-            curr = t;
+        Point curr = null;
+        {
+            Collection<Point> set = graph.get(array[0]);
+            double max = -1000;
+            for (Point t : set) {
+                double angle = Math.atan2(t.y - prev.y, t.x - prev.x);
+                angle = Math.PI / 2 - angle;
+                if (angle > max) {
+                    max = angle;
+                    curr = t;
+                }
+            }
         }
         r.add(curr);
         Point start = prev;
 
         List<Point> bad = new ArrayList<>();
 
+        double area = 0;
+        Polygon result = null;
+
         for (; ; ) {
             double max = -1000;
             Point maxPoint = null;
             if (curr == null) return null;
-            List<Point> nextSet = graph.get(curr);
+            Collection<Point> nextSet = graph.get(curr);
             if (nextSet == null) return null;
             for (Point point : nextSet) {
                 if (!bad.contains(point) && !r.contains(point) && point != prev && (r.size() >= 2 || point != start)) {
@@ -130,6 +135,16 @@ public class ConvexHull {
                     }
                 }
             }
+            if (r.contains(maxPoint)) {
+                int b = r.indexOf(maxPoint);
+                List<Point> list = r.subList(b, r.size() - 1);
+                Polygon polygon = new Polygon(list);
+                double a = Area.compute(polygon);
+                if (a > area) {
+                    area = a;
+                    result = polygon;
+                }
+            }
             if (maxPoint == null) {
                 r.remove(curr);
                 bad.add(curr);
@@ -137,6 +152,9 @@ public class ConvexHull {
                     prev = r.get(r.size() - 2);
                     curr = r.get(r.size() - 1);
                 } else {
+                    if (r.isEmpty()) {
+                        return result;
+                    }
                     prev = start;
                     curr = r.get(r.size() - 1);
                 }

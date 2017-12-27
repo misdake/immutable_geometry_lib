@@ -41,10 +41,10 @@ public class Cut {
      * @return 外边界，Polygon类型。如果不是连通图则返回null。
      */
     public static Polygon border(Graph graph) {
-        if (graph.type != Graph.Type.CONNECTED && graph.type != Graph.Type.PLANAR) graph = graph.validate();
-        if (graph.type != Graph.Type.CONNECTED && graph.type != Graph.Type.PLANAR) return null;
+//        if (graph.type != Graph.Type.CONNECTED && graph.type != Graph.Type.PLANAR) graph = graph.validate();
+//        if (graph.type != Graph.Type.CONNECTED && graph.type != Graph.Type.PLANAR) return null;
 
-        Set<Point> vertices = graph.vertices;
+        Set<Point> vertices = new HashSet<>(graph.vertices);
         Map<Point, Set<Point>> edges = new HashMap<>();
         for (Segment e : graph.edges) {
             Set<Point> s1 = edges.get(e.a);
@@ -55,66 +55,9 @@ public class Cut {
             s2.add(e.a);
         }
 
-        Point from = vertices.iterator().next();
-        {
-            for (Point p : vertices) {
-                if (p.x < from.x || (p.x == from.x && p.y < from.y)) {
-                    from = p;
-                }
-            }
-        }
-        Point prev = from;
-        Point curr = null;
-        {
-            Set<Point> points = edges.get(from);
-            double max = -1000;
-            for (Point t : points) {
-                double angle = Math.atan2(t.y - from.y, t.x - from.x);
-                if (angle > max) {
-                    max = angle;
-                    curr = t;
-                }
-            }
-        }
-        List<Point> r = new ArrayList<>();
-        List<Point> bad = new ArrayList<>();
-        r.add(curr);
+        Polygon polygon = ConvexHull.convexHull_misdake(vertices, edges);
 
-        for (; ; ) {
-            double max = -1000;
-            Point maxPoint = null;
-            if (curr == null) return null;
-            Set<Point> points = edges.get(curr);
-            if (points == null) return null;
-            for (Point point : points) {
-                if (!bad.contains(point) /*&& !r.contains(point)*/ && (r.size() >= 2 || point != from)) {
-                    double v = -L.angle(prev, curr, point);
-                    if (v > max) {
-                        max = v;
-                        maxPoint = point;
-                    }
-                }
-            }
-            if (maxPoint == null) {
-                r.remove(curr);
-                bad.add(curr);
-                if (r.size() > 1) {
-                    prev = r.get(r.size() - 2);
-                    curr = r.get(r.size() - 1);
-                } else {
-                    prev = from;
-                    curr = r.get(r.size() - 1);
-                }
-            } else {
-                if (maxPoint == from) break;
-                r.add(maxPoint);
-                prev = curr;
-                curr = maxPoint;
-            }
-        }
-        r.add(from);
-
-        return new Polygon(r);
+        return polygon;
     }
 
     /**
@@ -124,8 +67,8 @@ public class Cut {
      * @return
      */
     public static MultiPolygon cutPlaneByPlanarGraph(Graph graph) {
-        if (graph.type != Graph.Type.PLANAR) graph = graph.validate();
-        if (graph.type != Graph.Type.PLANAR) return null;
+//        if (graph.type != Graph.Type.PLANAR) graph = graph.validate();
+//        if (graph.type != Graph.Type.PLANAR) return null;
 
         List<Polygon> l = new ArrayList<>();
 

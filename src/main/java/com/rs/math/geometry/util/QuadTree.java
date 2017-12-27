@@ -10,6 +10,10 @@ public class QuadTree<T extends Point> {
 
     Node<T> root;
 
+    public QuadTree(AABB aabb) {
+        root = new Node<>(0, aabb.minX, aabb.maxX, aabb.minY, aabb.maxY);
+    }
+
     public QuadTree(double minX, double maxX, double minY, double maxY) {
         root = new Node<>(0, minX, maxX, minY, maxY);
     }

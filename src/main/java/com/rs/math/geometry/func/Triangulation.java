@@ -8,7 +8,7 @@ import org.jdelaunay.delaunay.geometries.DTriangle;
 
 import java.util.*;
 
-public class Triangulation {
+    public class Triangulation {
 
     public static class CdtResult {
         public final Set<Point>    points;
